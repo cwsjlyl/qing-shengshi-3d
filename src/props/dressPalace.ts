@@ -199,9 +199,11 @@ function addGrassVerge(scene: Scene, parent: TransformNode): void {
 function addPavingOverlay(scene: Scene, parent: TransformNode): void {
   // Continuous cobble planes hide the 4×4 pack module seams on walkable ground, leaving the ponds open.
   const patches: Array<[string, number, number, number, number]> = [
-    // name, cx, cz, width, depth — courtyard is ~28×28, ponds at x=-8.35..-4.5 and -2.0..0.35, z=-0.35..8.4
+    // name, cx, cz, width, depth — courtyard is ~28×28.
+    // Ponds (visible water) at x=-8.00..-5.91 and -0.49..0.00, z=0..5.12 (bridge north of that).
+    // Aisle cobble meets the pack 汉白玉 lips (west coping x=-5.91..-5.05, east x=-1.35..-0.49).
     ['pave-west', -11.175, 0, 5.65, 28],
-    ['pave-aisle', -3.25, 0, 2.5, 28],
+    ['pave-aisle', -3.20, 0, 3.70, 28],
     ['pave-east', 7.175, 0, 13.65, 28],
     ['pave-south', -4.0, -7.175, 8.7, 13.65],
     ['pave-north', -4.0, 11.2, 8.7, 5.6]

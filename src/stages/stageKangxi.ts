@@ -1,6 +1,7 @@
 import { Color3, Scene, Vector3 } from '@babylonjs/core';
 import { attachToWorld, buildCharacter } from '../characters/buildCharacter';
 import { WalkGrid } from '../engine/collision';
+import { applyKangxiWalk } from './walkLayouts';
 import { DIALOGUE } from '../data/content';
 import { clearMaterialCaches } from '../engine/materials';
 import { addSkyDome, addWarmPalaceLights, enrichImportedMaterials, finalizeShadows } from '../engine/sceneSetup';
@@ -11,7 +12,7 @@ import type { HUD } from '../ui/hud';
 import { createPlayer } from '../player/player';
 import { buildExitMarker } from '../props/props';
 import { applyPalacePalette, dressCourtyard, retintStoneBridges } from '../props/dressPalace';
-import { dressKangxiPack, MESHY_COURT } from '../props/packDetail';
+import { dressKangxiPack } from '../props/packDetail';
 import { npcInteractable, pointInteractable } from './helpers';
 import type { StageHandle } from './types';
 import { rect, type MinimapSchema } from '../ui/minimap';
@@ -48,104 +49,7 @@ export async function loadKangxiStage(
   onProgress?.(0.7, '正在布置人物……');
 
   const grid = new WalkGrid(0.42);
-  // Outer walls (gate gap around x=[-5.4, 5.4], z=14)
-  grid.addSolid(-15.2, -13.2, -15.2, 15.2);
-  grid.addSolid(13.2, 15.2, -15.2, 15.2);
-  grid.addSolid(-15.2, 15.2, -15.2, -13.2);
-  grid.addSolid(-15.2, -5.4, 13.2, 15.2);
-  grid.addSolid(5.4, 15.2, 13.2, 15.2);
-  // Gate tower piers, leave a central passage
-  grid.addSolid(-4.2, -1.15, 11.5, 15.0, 0, 11);
-  grid.addSolid(1.15, 4.2, 11.5, 15.0, 0, 11);
-  // Ceremonial hall interior. Front central stairs are decorative and
-  // lead into this solid, so they stay at ground height (no ramp) to
-  // avoid trapping the player on the 台基.
-  grid.addSolid(-5.2, 5.2, -13.2, -4.15, 0, 13);
-  // Raised 台基 wings / cheeks (measured base X[-7.57,7.57] Z[-13.57,-1.10]),
-  // leaving a central stair gap around |x|<2.2. Does not extend onto the
-  // empty cobble north of z≈-1.1 (stool at 7.2,-0.6 stays clear).
-  grid.addSolid(-7.55, -5.2, -13.2, -1.15, 0, 2.2);
-  grid.addSolid(5.2, 7.55, -13.2, -1.15, 0, 2.2);
-  grid.addSolid(-5.2, -2.2, -4.15, -1.15, 0, 2.2);
-  grid.addSolid(2.2, 5.2, -4.15, -1.15, 0, 2.2);
-  // Lotus pond, with a bridge gap near x=-4, z=6.2–8.3
-  grid.addSolid(-8.35, -4.5, -0.35, 6.15);
-  grid.addSolid(-2.0, 0.35, -0.35, 6.15);
-  grid.addSolid(-8.35, -4.75, 6.15, 8.4);
-  grid.addSolid(-2.0, 0.35, 6.15, 8.4);
-  // Actual remaining rockery outcrop (measured Babylon AABB
-  // X[6.490, 9.708] Z[4.782, 7.124]). The previous second box
-  // (1.2, 8.6, 0.2, 7.8) was leftover after the visual rockery was
-  // reduced and blocked a large stretch of empty east-courtyard cobble.
-  grid.addSolid(6.45, 9.75, 4.74, 7.16, 0, 3.0);
-  // Well + the bamboo clump beside it (measured well X[-10.53,-8.04]
-  // Z[-7.30,-5.70]; bamboo X[-10.29,-8.56] Z[-9.06,-6.96]). Tightened
-  // off the surrounding cobble.
-  grid.addSolid(-10.65, -7.95, -9.20, -5.58, 0, 3.0);
-
-  // Meshy moon-gate wall wings (opening stays walkable) and pavilion footprint.
-  const gate = MESHY_COURT.moonGate;
-  const gateHalfW = 0.949 * gate.scale;
-  const gateHalfT = 0.239 * gate.scale;
-  const opening = 1.15;
-  // rotY = π/2: wall runs along Z, thickness along X.
-  grid.addSolid(gate.x - gateHalfT - 0.1, gate.x + gateHalfT + 0.1, gate.z - gateHalfW, gate.z - opening, 0, 6.5);
-  grid.addSolid(gate.x - gateHalfT - 0.1, gate.x + gateHalfT + 0.1, gate.z + opening, gate.z + gateHalfW, 0, 6.5);
-  const pav = MESHY_COURT.pavilion;
-  const pavR = 0.67 * pav.scale * 0.85;
-  grid.addSolid(pav.x - pavR, pav.x + pavR, pav.z - pavR, pav.z + pavR, 0, 7.5);
-  // Meshy peony pots (~scale 0.42–0.5, xz radius ≈ 0.92) and drum stools (~scale 0.36).
-  const peonySolids: Array<[number, number, number]> = [
-    [-5.85, 0.4, 0.42],
-    [-6.05, -3.9, 0.42],
-    [2.15, -2.8, 0.42],
-    [2.35, -5.6, 0.42],
-    [6.4, -2.2, 0.45],
-    [7.6, -4.8, 0.48],
-    [10.4, -5.0, 0.5],
-    [9.6, -8.6, 0.5],
-    [4.8, 8.4, 0.42],
-    [6.4, 10.6, 0.42]
-  ];
-  for (const [x, z, s] of peonySolids) {
-    const r = 0.92 * s * 0.7;
-    grid.addSolid(x - r, x + r, z - r, z + r, 0, 1.8);
-  }
-  const stoolSolids: Array<[number, number]> = [
-    [7.2, -0.6],
-    [10.2, -6.2],
-    [6.0, -4.4]
-  ];
-  for (const [x, z] of stoolSolids) {
-    const r = 0.9 * 0.36 * 0.75;
-    grid.addSolid(x - r, x + r, z - r, z + r, 0, 1.0);
-  }
-
-  // West throne terrace: two pack modules at (-10, 7) and (-10, 11). Collision
-  // covers only the walkable top (y=1.1), not the skirt or the courtyard
-  // south of z≈5.07. East step-flight is a ramp, not a flat 1.1 slab.
-  grid.addPlatform(-11.93, -8.07, 5.07, 12.93, 1.1);
-  // Roofs / walkway eaves: block the camera but not the player.
-  grid.addCameraSolid(-14.4, -11.6, -8.5, 2.5, 2.5, 6.5);
-  grid.addCameraSolid(10.2, 14.4, -12.5, 9.5, 2.5, 7.5);
-  grid.addCameraSolid(-13.5, -7.4, 4.6, 13.4, 3.2, 8.0);
-  grid.addCameraSolid(-14.4, -11.6, 2.0, 6.5, 2.5, 6.5);
-  grid.addCameraSolid(10.2, 14.4, -6.5, -1.5, 2.5, 7.5);
-
-  // East step-flight measured X[-8.000,-5.800] Z[8.900,13.100], high at
-  // the west (platform) end, low at the east. Slightly widened on the
-  // approach and sides so the player centre can enter the volume; height
-  // is also sampled under the feet (ramps only).
-  grid.addRamp({
-    minX: -8.07,
-    maxX: -5.5,
-    minZ: 8.75,
-    maxZ: 13.25,
-    y0: 0,
-    y1: 1.1,
-    axis: 'x',
-    fromMin: false
-  });
+  applyKangxiWalk(grid);
 
   const chars = [
     // Standing on the dais, just south of the throne (same facing). The GLB
@@ -194,10 +98,9 @@ export async function loadKangxiStage(
       rect(-7.55, 7.55, -13.5, -1.15),
       rect(-11.93, -8.07, 5.07, 12.93, 'platform'),
       rect(-8.07, -5.5, 8.75, 13.25, 'platform'),
-      rect(-8.35, -4.5, -0.35, 6.15, 'water'),
-      rect(-2.0, 0.35, -0.35, 6.15, 'water'),
-      rect(-8.35, -4.75, 6.15, 8.4, 'water'),
-      rect(-2.0, 0.35, 6.15, 8.4, 'water'),
+      rect(-8.00, -6.20, 0.30, 5.12, 'water'),
+      rect(-0.20, 0.02, 0.30, 5.12, 'water'),
+      rect(-8.20, 0.20, 5.12, 8.08, 'platform'),
       rect(6.45, 9.75, 4.74, 7.16),
       rect(-10.65, -7.95, -9.20, -5.58),
       rect(9.0, 9.6, -3.0, -0.6),

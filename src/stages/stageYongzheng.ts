@@ -9,6 +9,7 @@ import {
 } from '@babylonjs/core';
 import { attachToWorld, buildCharacter } from '../characters/buildCharacter';
 import { WalkGrid } from '../engine/collision';
+import { applyYongzhengWalk } from './walkLayouts';
 import { DIALOGUE } from '../data/content';
 import { clearMaterialCaches, hexColor, stdMat } from '../engine/materials';
 import { addSkyDome, addWarmPalaceLights, enrichImportedMaterials, finalizeShadows } from '../engine/sceneSetup';
@@ -134,26 +135,7 @@ export async function loadYongzhengStage(
   onProgress?.(0.85, '正在布置人物……');
 
   const grid = new WalkGrid(0.42);
-  grid.addSolid(-19.2, -17.2, -19.2, 19.2);
-  grid.addSolid(17.2, 19.2, -19.2, 19.2);
-  grid.addSolid(-19.2, -4.0, 17.2, 19.2);
-  grid.addSolid(4.0, 19.2, 17.2, 19.2);
-  grid.addSolid(-19.2, -2.4, -19.2, -17.2);
-  grid.addSolid(2.4, 19.2, -19.2, -17.2);
-  grid.addSolid(-4.2, -1.15, 14.6, 18.4, 0, 11);
-  grid.addSolid(1.15, 4.2, 14.6, 18.4, 0, 11);
-  grid.addSolid(-5.4, 5.4, -17.2, -10.2, 0, 13);
-  grid.addPlatform(-2.05, 2.05, -10.0, -4.0, 1.1);
-  grid.addRamp({
-    minX: -2.25,
-    maxX: 2.25,
-    minZ: -4.25,
-    maxZ: -2.25,
-    y0: 0,
-    y1: 1.1,
-    axis: 'z',
-    fromMin: false
-  });
+  applyYongzhengWalk(grid);
 
   // Standing in front of the throne on the dais (y=1.1). The GLB is a
   // standing pose, so we do not bend the legs to sit. Same facing and talk

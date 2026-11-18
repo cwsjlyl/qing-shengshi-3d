@@ -1,6 +1,7 @@
 import { Color3, Mesh, Scene, Vector3 } from '@babylonjs/core';
 import { attachToWorld, buildCharacter, type Character } from '../characters/buildCharacter';
 import { WalkGrid } from '../engine/collision';
+import { applyQianlongWalk, isQianlongShipBlock } from './walkLayouts';
 import { DIALOGUE } from '../data/content';
 import { clearMaterialCaches, hexColor } from '../engine/materials';
 import { addSkyDome, addWarmPalaceLights, enrichImportedMaterials, finalizeShadows } from '../engine/sceneSetup';
@@ -236,24 +237,7 @@ export async function loadQianlongStage(
   onProgress?.(0.8, '正在布置人物……');
 
   const grid = new WalkGrid(0.45);
-  grid.addSolid(-46, -44, -28, 52);
-  grid.addSolid(-46, 18, 50, 52);
-  grid.addSolid(-46, 18, -28, -26);
-  // Water is not walkable except the pier corridor (x=18–24, z=6–10). After the password
-  // the ship-end block is removed so the player can reach the hull.
-  grid.addSolid(18.5, 90, -40, 0.15);
-  grid.addSolid(18.5, 90, 4.25, 50);
-  const shipBlock = { minX: 24.6, maxX: 90, minZ: 0.15, maxZ: 4.25 };
-  grid.addSolid(shipBlock.minX, shipBlock.maxX, shipBlock.minZ, shipBlock.maxZ);
-  grid.addSolid(-4.2, 4.2, 38.8, 44.0, 0, 12);
-  grid.addSolid(-31.5, -24.8, 7.2, 13.2, 0, 8);
-  // Meshy shore pavilion footprint (scale 4.2, xz radius ≈ 0.67).
-  grid.addSolid(13.9, 18.5, 9.9, 14.5, 0, 9);
-  const pr = 0.92 * 0.5 * 0.7;
-  grid.addSolid(15.2 - pr, 15.2 + pr, 9.6 - pr, 9.6 + pr, 0, 1.8);
-  grid.addSolid(17.4 - pr, 17.4 + pr, 14.4 - pr, 14.4 + pr, 0, 1.8);
-  const sr = 0.9 * 0.36 * 0.75;
-  grid.addSolid(15.4 - sr, 15.4 + sr, 5.4 - sr, 5.4 + sr, 0, 1.0);
+  applyQianlongWalk(grid, true);
 
   const chars: Character[] = [];
   const qianlong = attachToWorld(
@@ -349,12 +333,12 @@ export async function loadQianlongStage(
       rect(-46, -44, -28, 52),
       rect(-46, 18, 50, 52),
       rect(-46, 18, -28, -26),
-      rect(18.5, 90, -40, 0.15, 'water'),
-      rect(18.5, 90, 4.25, 50, 'water'),
+      rect(18.5, 90, -40, -0.15, 'water'),
+      rect(18.5, 90, 4.15, 50, 'water'),
       rect(-4.2, 4.2, 38.8, 44.0),
       rect(-31.5, -24.8, 7.2, 13.2),
       rect(13.9, 18.5, 9.9, 14.5),
-      rect(18, 24.6, 0.15, 4.25, 'platform'),
+      rect(18, 24.6, -0.15, 4.15, 'platform'),
       rect(24, 48, 0.5, 15.5)
     ],
     items: [
@@ -425,7 +409,7 @@ export async function loadQianlongStage(
 
 export function unlockShipApproach(stage: StageHandle): void {
   // Drop the sea block that stopped the player short of the hull.
-  stage.grid.solids = stage.grid.solids.filter((s) => !(s.minX === 24.6 && s.maxZ === 4.25));
+  stage.grid.solids = stage.grid.solids.filter((s) => !isQianlongShipBlock(s));
 }
 
 export function getFlagship(scene: Scene): Mesh | TransformNode | null {
