@@ -1,0 +1,25 @@
+{
+  "name": "qing-shengshi-3d",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "課堂 3D 探索遊戲「最後的皇朝：康雍乾盛世」",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@babylonjs/core": "^9.37.0",
+    "@babylonjs/loaders": "^9.37.0"
+  },
+  "devDependencies": {
+    "@gltf-transform/core": "^4.5.1",
+    "@gltf-transform/extensions": "^4.5.1",
+    "@gltf-transform/functions": "^4.5.1",
+    "meshoptimizer": "^1.3.0",
+    "puppeteer-core": "^25.18.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8"
+  }
+}

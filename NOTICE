@@ -1,0 +1,91 @@
+NOTICE — 最後的皇朝：康雍乾盛世
+
+This is an original classroom exploration game. The palace setting is a
+紫禁城風格 scene inspired by an imperial court. It is not an official
+product of the Forbidden City / Palace Museum, not a scan or replica of
+the real palace, and not a reproduction of any publisher’s textbook.
+
+--------------------------------------------------------------------------------
+3D architecture and garden models
+--------------------------------------------------------------------------------
+Pack:    Imperial China Palace and Garden
+Source:  https://3dassets.dev/packs/imperial-china-palace-and-garden
+Licence: CC0 1.0 Universal (https://creativecommons.org/publicdomain/zero/1.0/)
+
+Every model used in the game is stored in public/assets/models/ and loaded
+from this repository at runtime (not from a CDN). A file-by-file list with
+asset ids, source pages and original CDN URLs is in
+public/assets/models/SOURCES.txt.
+
+Starter courtyard (Kangxi / Yongzheng palace ground):
+  courtyard.glb  (asset 36222)
+  https://3dassets.dev/assets/imperial-china-palace-and-garden-walled--b51639b8-starter-scene
+
+Other placed pieces include the ceremonial hall, gate tower, imperial
+throne (36199), footstool, guardian lions, banners, chests, writing desk,
+folding screen, cauldron, lanterns, rocks, trees, pavilions, and walls,
+plus later additions: stone balustrade runs (36174), lotus pond edges
+(36181, 36183), floating water lanterns (36189), peony planters (36198),
+stepping-stone paths (36197), covered walkway bays/corners (36167, 36168),
+latticed screen doors (36182), dragon roof finials (36179), and hall
+furnishings (tea table 36201, tea set 36202, guqin 36203, inkstone 36205,
+hanging scroll pair 36208, bronze bell 36215). See SOURCES.txt for the
+complete list. Training dummy (36212) and pond water module (36184) are
+not used.
+
+
+--------------------------------------------------------------------------------
+Meshy models
+--------------------------------------------------------------------------------
+Stylised props were generated with Meshy under the free plan and then
+decimated, given smooth normals, and assigned original stylised PBR materials
+in this project (no Meshy textures — the free plan does not include them).
+
+  meshy-lantern.glb
+  meshy-imperial-boat.glb
+  meshy-pavilion.glb
+  meshy-moon-gate.glb
+  meshy-garden-peony.glb
+  meshy-stone-drum-stool.glb
+  meshy-court-flagstones.glb
+
+Model created with Meshy – CC BY 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+
+See public/assets/models/SOURCES.txt for the per-file record. High-poly
+source copies are kept outside the student-facing game folder.
+
+--------------------------------------------------------------------------------
+Tripo character meshes
+--------------------------------------------------------------------------------
+Character meshes were generated with the Tripo free plan (H2.5, untextured)
+from original concept art, then decimated and given stylised PBR materials
+in this project. Used with attribution under Tripo free-plan terms.
+These are not licensed as CC BY (that licence applies to the Meshy props
+above, not to Tripo).
+
+  tripo-young-attendant.glb
+  tripo-court-emperor.glb
+
+See public/assets/models/SOURCES.txt for face counts and notes. High-poly
+sources are kept outside the student-facing game folder.
+
+--------------------------------------------------------------------------------
+Original work in this project
+--------------------------------------------------------------------------------
+Procedural geometric characters are now partly Tripo base meshes with
+in-game colouring (the student explorer, the three emperors, officials,
+和珅, and the 滿族 courtier). The 漢族 soft-cap figure, farmers (straw
+hat), and soldiers (helmet) remain original procedural models. The 南巡
+escort junks (the visible flagship uses the Meshy imperial boat above),
+outdoor terrain and sea, gameplay, dialogue, and user interface are
+original works created for this classroom game.
+
+No official imperial portraits, copyrighted textbook art, or brand IP
+are included.
+
+--------------------------------------------------------------------------------
+Software
+--------------------------------------------------------------------------------
+Babylon.js (@babylonjs/core, @babylonjs/loaders) — Apache License 2.0
+Vite, TypeScript — MIT

@@ -1,0 +1,285 @@
+3D model sources for 最後的皇朝：康雍乾盛世
+
+All models listed here are from the "Imperial China Palace and Garden" pack
+on 3DAssets.dev, licensed CC0 1.0 Universal.
+Pack page: https://3dassets.dev/packs/imperial-china-palace-and-garden
+Licence: https://creativecommons.org/publicdomain/zero/1.0/
+
+Files are hosted in this folder and loaded locally at runtime (no CDN).
+Downloaded with curl from the pack CDN URLs on 2026-11-17.
+
+file                     id       title / source page / cdn
+----------------------------------------------------------------------------------------
+altar-table.glb          36219    Ancestral Altar Table
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-ancestral-altar-table-d4f28bab
+                         cdn:  https://cdn.3dassets.dev/assets/36219/v1/model.glb
+
+bamboo.glb               36194    Bamboo Clump
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-bamboo-clump-66640906
+                         cdn:  https://cdn.3dassets.dev/assets/36194/v1/model.glb
+
+banner-pole.glb          36209    Ceremonial Banner Pole
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-ceremonial-banner-pol-5795ed1a
+                         cdn:  https://cdn.3dassets.dev/assets/36209/v1/model.glb
+
+bonsai.glb               36193    Bonsai In Glazed Pot
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-bonsai-in-glazed-pot-e0f303fa
+                         cdn:  https://cdn.3dassets.dev/assets/36193/v1/model.glb
+
+brazier.glb              36220    Bronze Brazier Stand
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-bronze-brazier-stand-b637e423
+                         cdn:  https://cdn.3dassets.dev/assets/36220/v1/model.glb
+
+brush-stand.glb          36204    Calligraphy Brush Stand
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-calligraphy-brush-sta-2ce8f5d6
+                         cdn:  https://cdn.3dassets.dev/assets/36204/v1/model.glb
+
+cauldron.glb             36191    Bronze Tripod Cauldron
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-bronze-tripod-cauldro-97a938c4
+                         cdn:  https://cdn.3dassets.dev/assets/36191/v1/model.glb
+
+ceremonial-drum.glb      36214    Ceremonial Drum On Stand
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-ceremonial-drum-on-st-66581778
+                         cdn:  https://cdn.3dassets.dev/assets/36214/v1/model.glb
+
+ceremonial-hall.glb      36163    Ceremonial Hall
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-ceremonial-hall-3f95c2b7
+                         cdn:  https://cdn.3dassets.dev/assets/36163/v1/model.glb
+
+chest.glb                36216    Lacquer Storage Chest
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-lacquer-storage-chest-d4266bd5
+                         cdn:  https://cdn.3dassets.dev/assets/36216/v1/model.glb
+
+column.glb               36175    Lacquered Column And Bracket
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-lacquered-column-and--c9255e03
+                         cdn:  https://cdn.3dassets.dev/assets/36175/v1/model.glb
+
+courtyard-well.glb       36192    Courtyard Well
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-courtyard-well-9fb10316
+                         cdn:  https://cdn.3dassets.dev/assets/36192/v1/model.glb
+
+courtyard.glb            36222    Walled palace courtyard and lotus garden
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-walled--b51639b8-starter-scene
+                         cdn:  https://cdn.3dassets.dev/assets/36222/v1/model.glb
+
+floor-cushion.glb        36218    Floor Cushion Set
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-floor-cushion-set-5e179f9f
+                         cdn:  https://cdn.3dassets.dev/assets/36218/v1/model.glb
+
+folding-screen.glb       36207    Folding Screen
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-folding-screen-5a8651b3
+                         cdn:  https://cdn.3dassets.dev/assets/36207/v1/model.glb
+
+footstool.glb            36200    Throne Footstool
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-throne-footstool-b00e5767
+                         cdn:  https://cdn.3dassets.dev/assets/36200/v1/model.glb
+
+gate-tower.glb           36164    Gate Tower
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-gate-tower-9d0d0bb6
+                         cdn:  https://cdn.3dassets.dev/assets/36164/v1/model.glb
+
+guardian-lions.glb       36211    Guardian Lion Pair
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-guardian-lion-pair-58194b81
+                         cdn:  https://cdn.3dassets.dev/assets/36211/v1/model.glb
+
+incense-burner.glb       36190    Stone Incense Burner
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-stone-incense-burner-68da1dc2
+                         cdn:  https://cdn.3dassets.dev/assets/36190/v1/model.glb
+
+lantern-hanging.glb      36188    Hanging Silk Lantern
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-hanging-silk-lantern-24c01831
+                         cdn:  https://cdn.3dassets.dev/assets/36188/v1/model.glb
+
+lantern-standing.glb     36187    Standing Garden Lantern
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-standing-garden-lante-038d9d21
+                         cdn:  https://cdn.3dassets.dev/assets/36187/v1/model.glb
+
+lotus-cluster.glb        36185    Lotus Cluster
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-lotus-cluster-9b11a9b2
+                         cdn:  https://cdn.3dassets.dev/assets/36185/v1/model.glb
+
+lotus-pavilion.glb       36223    Lotus pond pavilion
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-lotus-pond-pavilion-f0b2d3d6
+                         cdn:  https://cdn.3dassets.dev/assets/36223/v1/model.glb
+
+parasol.glb              36221    Ceremonial Parasol
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-ceremonial-parasol-cea9c970
+                         cdn:  https://cdn.3dassets.dev/assets/36221/v1/model.glb
+
+paving.glb               36171    Courtyard Paving Module
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-courtyard-paving-modu-1ccb86aa
+                         cdn:  https://cdn.3dassets.dev/assets/36171/v1/model.glb
+
+pennant-pair.glb         36210    Pennant Pair On Poles
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-pennant-pair-on-poles-2d4a0f4c
+                         cdn:  https://cdn.3dassets.dev/assets/36210/v1/model.glb
+
+plum-tree.glb            36195    Plum Tree In Blossom
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-plum-tree-in-blossom-b09709bd
+                         cdn:  https://cdn.3dassets.dev/assets/36195/v1/model.glb
+
+rockery.glb              36180    Rockery Outcrop
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-rockery-outcrop-a70f96c4
+                         cdn:  https://cdn.3dassets.dev/assets/36180/v1/model.glb
+
+scholars-stone.glb       36186    Scholars Stone
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-scholars-stone-05403e94
+                         cdn:  https://cdn.3dassets.dev/assets/36186/v1/model.glb
+
+scroll-rack.glb          36206    Scroll Rack
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-scroll-rack-f7fd0af5
+                         cdn:  https://cdn.3dassets.dev/assets/36206/v1/model.glb
+
+stone-bench.glb          36196    Garden Stone Bench
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-garden-stone-bench-aa1e1d1c
+                         cdn:  https://cdn.3dassets.dev/assets/36196/v1/model.glb
+
+stone-bridge.glb         36169    Arched Stone Bridge
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-arched-stone-bridge-f54cac4b
+                         cdn:  https://cdn.3dassets.dev/assets/36169/v1/model.glb
+
+terrace-platform.glb     36172    Terrace Platform Module
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-terrace-platform-modu-9ce05313
+                         cdn:  https://cdn.3dassets.dev/assets/36172/v1/model.glb
+
+terrace-steps.glb        36173    Terrace Step Flight
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-terrace-step-flight-50686acc
+                         cdn:  https://cdn.3dassets.dev/assets/36173/v1/model.glb
+
+throne.glb               36199    Imperial Throne Chair
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-imperial-throne-chair-ddfa68c5
+                         cdn:  https://cdn.3dassets.dev/assets/36199/v1/model.glb
+
+wall-corner.glb          36162    Palace Wall Corner
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-palace-wall-corner-92015453
+                         cdn:  https://cdn.3dassets.dev/assets/36162/v1/model.glb
+
+wall-end-pier.glb        36165    Palace Wall End Pier
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-palace-wall-end-pier-21da0954
+                         cdn:  https://cdn.3dassets.dev/assets/36165/v1/model.glb
+
+wall-moon-gate.glb       36166    Palace Wall Moon Gate
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-palace-wall-moon-gate-a6732c7f
+                         cdn:  https://cdn.3dassets.dev/assets/36166/v1/model.glb
+
+wall-straight.glb        36161    Palace Wall Straight
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-palace-wall-straight-02b9fb76
+                         cdn:  https://cdn.3dassets.dev/assets/36161/v1/model.glb
+
+water-pavilion.glb       36170    Water Pavilion
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-water-pavilion-477e41ba
+                         cdn:  https://cdn.3dassets.dev/assets/36170/v1/model.glb
+
+weapon-rack.glb          36213    Polearm Weapon Rack
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-polearm-weapon-rack-b76c138a
+                         cdn:  https://cdn.3dassets.dev/assets/36213/v1/model.glb
+
+writing-desk.glb         36217    Scholars Writing Desk
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-scholars-writing-desk-6b32813c
+                         cdn:  https://cdn.3dassets.dev/assets/36217/v1/model.glb
+
+# Additional modules downloaded 2026-11-18 (CC0 1.0, local files only, no runtime CDN)
+
+bronze-bell.glb          36215    Bronze Bell On Frame
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-bronze-bell-on-frame-7d2d169b
+                         cdn:  https://cdn.3dassets.dev/assets/36215/v1/model.glb
+
+covered-walkway-bay.glb  36167    Covered Walkway Bay
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-covered-walkway-bay-a5e8e636
+                         cdn:  https://cdn.3dassets.dev/assets/36167/v1/model.glb
+
+covered-walkway-corner.glb 36168  Covered Walkway Corner
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-covered-walkway-corne-b66b3357
+                         cdn:  https://cdn.3dassets.dev/assets/36168/v1/model.glb
+
+dragon-roof-finial.glb   36179    Dragon Roof Finial
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-dragon-roof-finial-7dd7653a
+                         cdn:  https://cdn.3dassets.dev/assets/36179/v1/model.glb
+
+floating-water-lantern.glb 36189  Floating Water Lantern
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-floating-water-lanter-5d8204d4
+                         cdn:  https://cdn.3dassets.dev/assets/36189/v1/model.glb
+
+guqin.glb                36203    Guqin On Stand
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-guqin-on-stand-ba936ac2
+                         cdn:  https://cdn.3dassets.dev/assets/36203/v1/model.glb
+
+hanging-scroll-pair.glb  36208    Hanging Scroll Pair
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-hanging-scroll-pair-81f2dffc
+                         cdn:  https://cdn.3dassets.dev/assets/36208/v1/model.glb
+
+inkstone.glb             36205    Inkstone And Water Dropper
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-inkstone-and-water-dr-df828331
+                         cdn:  https://cdn.3dassets.dev/assets/36205/v1/model.glb
+
+latticed-screen-door.glb 36182    Latticed Screen Door Set
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-latticed-screen-door--252408e2
+                         cdn:  https://cdn.3dassets.dev/assets/36182/v1/model.glb
+
+lotus-pond-edge.glb      36181    Lotus Pond Edge Straight
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-lotus-pond-edge-strai-4d658d99
+                         cdn:  https://cdn.3dassets.dev/assets/36181/v1/model.glb
+
+lotus-pond-edge-corner.glb 36183  Lotus Pond Edge Corner
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-lotus-pond-edge-corne-f573f9fb
+                         cdn:  https://cdn.3dassets.dev/assets/36183/v1/model.glb
+
+low-tea-table.glb        36201    Low Tea Table
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-low-tea-table-44124ae8
+                         cdn:  https://cdn.3dassets.dev/assets/36201/v1/model.glb
+
+peony-planter.glb        36198    Peony Planter
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-peony-planter-f6018406
+                         cdn:  https://cdn.3dassets.dev/assets/36198/v1/model.glb
+
+stepping-stone-path.glb  36197    Stepping Stone Path
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-stepping-stone-path-d1017407
+                         cdn:  https://cdn.3dassets.dev/assets/36197/v1/model.glb
+
+stone-balustrade.glb     36174    Stone Balustrade Run
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-stone-balustrade-run-3cdcc00b
+                         cdn:  https://cdn.3dassets.dev/assets/36174/v1/model.glb
+
+tea-set.glb              36202    Tea Set On Tray
+                         page: https://3dassets.dev/assets/imperial-china-palace-and-garden-tea-set-on-tray-b6d3f48a
+                         cdn:  https://cdn.3dassets.dev/assets/36202/v1/model.glb
+
+
+--------------------------------------------------------------------------------
+Meshy models (CC BY 4.0)
+--------------------------------------------------------------------------------
+Model created with Meshy – CC BY 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+
+These files are decimated, re-normalised copies of Meshy free-plan meshes.
+Stylised PBR sub-materials (lacquer, gold, paper, wood, tile, stone) were
+authored in this project; the generator output had positions only and no
+textures. Do not replace these with the unoptimized high-poly sources.
+
+file                       faces    notes
+----------------------------------------------------------------------------------------
+meshy-lantern.glb          5478     hanging lantern; instanced in the Kangxi courtyard
+meshy-moon-gate.glb        12346    garden moon-gate; one threshold in the Kangxi court
+meshy-pavilion.glb         19369    two-tier garden pavilion; Kangxi east garden + Qianlong shore (roof re-shelled)
+meshy-imperial-boat.glb    23884    南巡 flagship visual only (boarding gameplay unchanged; bow gold kept denser)
+meshy-garden-peony.glb      6562    celadon peony pot; Kangxi path / garden + Qianlong shore
+meshy-stone-drum-stool.glb  6345    stone drum stool; Kangxi court + Qianlong pier approach
+meshy-court-flagstones.glb    3738    warm granite flags + light mortar; Kangxi aisle + Qianlong shore
+
+
+--------------------------------------------------------------------------------
+Tripo character meshes (free-plan terms, not CC BY)
+--------------------------------------------------------------------------------
+Character meshes were generated with the Tripo free plan (H2.5, untextured)
+from original concept art, then decimated in this project and given stylised
+PBR sub-materials (skin, hair, robe, trim, shoes, gold, beads, hat, dragon).
+Used with attribution under Tripo free-plan terms. Do not describe these as
+CC BY (that licence is Meshy's). Do not replace these with the unoptimized
+high-poly sources, which stay outside the student-facing game folder.
+
+file                         faces    notes
+----------------------------------------------------------------------------------------
+tripo-young-attendant.glb    17312    young attendant / student explorer base (kind: player)
+tripo-court-emperor.glb      17889    court robe + official hat base (kangxi, yongzheng,
+                                      qianlong, official, heshen, manchu); robe / brim /
+                                      trim / skin / finial colours are overridden in-game
