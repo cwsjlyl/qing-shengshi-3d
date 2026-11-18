@@ -11,6 +11,7 @@ import { bindVisualViewport, Input } from './engine/input';
 import { createEngine, createGameScene } from './engine/sceneSetup';
 import { clearMaterialCaches } from './engine/materials';
 import { HUD } from './ui/hud';
+import { Minimap, type MinimapActor, type MinimapDot } from './ui/minimap';
 import { Joystick } from './ui/joystick';
 import { showDialogue, showMessage, showPassword, showQuiz, showSummary, showTitle, updateTitleProgress } from './ui/modals';
 import { loadKangxiStage } from './stages/stageKangxi';
@@ -34,11 +35,14 @@ export class Game {
   private nearest: Interactable | null = null;
   private boarded = false;
   private started = false;
+  private minimap: Minimap;
 
   constructor(canvas: HTMLCanvasElement, uiRoot: HTMLElement) {
     this.canvas = canvas;
     this.engine = createEngine(canvas);
     this.hud = new HUD(uiRoot);
+    this.minimap = new Minimap(this.hud.root);
+    this.minimap.setVisible(false);
     this.input = new Input(canvas);
     this.joystick = new Joystick(this.hud.joystickEl, this.hud.knobEl);
     this.unbindVv = bindVisualViewport();
@@ -53,10 +57,10 @@ export class Game {
 
     // Lightweight preloader scene (no heavy GLB yet)
     const bootScene = createGameScene(this.engine, {
-      clear: '#E3D0A8',
-      fog: '#E6D4B0',
-      fogStart: 140,
-      fogEnd: 280
+      clear: '#6AA4D4',
+      fog: '#A8C8E0',
+      fogStart: 160,
+      fogEnd: 320
     });
     this.scene = bootScene;
     bootScene.fogMode = 0;
@@ -67,16 +71,17 @@ export class Game {
     const cam = new FreeCamera('boot-cam', new V3(16, 8.2, 16), bootScene);
     cam.setTarget(new V3(0, 3.4, 0));
     bootScene.activeCamera = cam;
-    bootScene.clearColor = new Color4(0.89, 0.81, 0.64, 1);
+    bootScene.clearColor = new Color4(0.42, 0.65, 0.86, 1);
     new HemisphericLight('boot-hemi', new V3(0.2, 1, 0.25), bootScene).intensity = 0.78;
     const { DirectionalLight } = await import('@babylonjs/core');
     const sun = new DirectionalLight('boot-sun', new V3(-0.4, -1, 0.35), bootScene);
-    sun.intensity = 1.45;
-    sun.diffuse = new Color3(1, 0.9, 0.68);
+    sun.intensity = 1.25;
+    sun.diffuse = new Color3(1, 0.97, 0.9);
     const barge = buildImperialBarge(bootScene, 'boot-barge', 1);
     barge.root.position.set(0, 0.05, 0);
     barge.root.rotation.y = -0.62;
-    const { addTitleHaze } = await import('./engine/sceneSetup');
+    const { addTitleHaze, addSkyDome } = await import('./engine/sceneSetup');
+    addSkyDome(bootScene, '#2F74C4', '#B7D4EE', 400);
     addTitleHaze(bootScene);
     const { buildSea } = await import('./props/props');
     buildSea(bootScene, 'boot-sea', 120, 120, { centerX: 0, centerZ: 0, y: -0.35, shoreX: -70 });
@@ -113,14 +118,16 @@ export class Game {
     this.stage?.dispose();
     this.scene?.dispose();
     this.stage = null;
+    this.minimap.setSchema(null);
+    this.minimap.setVisible(false);
     this.boarded = false;
 
-    const clear = id === 'yongzheng' ? '#E8CFA0' : id === 'qianlong' ? '#A8C4D8' : '#B7D0E6';
+    const clear = id === 'yongzheng' ? '#C5D4E2' : id === 'qianlong' ? '#8FBFDC' : '#9EC8E6';
     const scene = createGameScene(this.engine, {
       clear,
       fog: clear,
-      fogStart: id === 'qianlong' ? 40 : 22,
-      fogEnd: id === 'qianlong' ? 140 : 70
+      fogStart: id === 'qianlong' ? 70 : 36,
+      fogEnd: id === 'qianlong' ? 200 : 110
     });
     this.scene = scene;
     this.stageId = id;
@@ -139,6 +146,7 @@ export class Game {
       id === 'kangxi' ? loadKangxiStage : id === 'yongzheng' ? loadYongzhengStage : loadQianlongStage;
     const stage = await loader(scene, this.canvas, this.input, this.joystick, this.hud, onProgress);
     this.stage = stage;
+    this.minimap.setSchema(stage.minimap ?? null);
     this.hud.hideModal();
     this.hud.setTitleMode(false);
     this.refreshQuest();
@@ -168,6 +176,7 @@ export class Game {
         stage.update?.(dt);
         this.updateInteract(dt);
         this.applyStrength();
+        this.updateMinimap();
         if (this.input.consumeInteract()) this.tryInteract();
       }
       scene.render();
@@ -267,6 +276,35 @@ export class Game {
     const q = it.getPosition();
     const facing = it.character?.root.rotation.y;
     stage.player.beginTalkFrame(new Vector3(q.x, q.y, q.z), facing);
+  }
+
+  private updateMinimap(): void {
+    const stage = this.stage;
+    const talkOpen = this.hud.modalEl.classList.contains('talk-frame');
+    const show = !!stage && this.started && !this.boarded && (!this.hud.isModalOpen || talkOpen);
+    this.minimap.setVisible(show);
+    if (!show || !stage) return;
+    const p = stage.player.getPosition();
+    const player: MinimapActor = {
+      x: p.x,
+      z: p.z,
+      facing: stage.player.character.root.rotation.y,
+      role: 'player'
+    };
+    const others: MinimapActor[] = [];
+    const extras: MinimapDot[] = [];
+    for (const it of stage.interactables) {
+      const pos = it.getPosition();
+      if (it.character) {
+        const emp = /kangxi|yongzheng|qianlong/.test(it.id);
+        others.push({ x: pos.x, z: pos.z, role: emp ? 'emperor' : 'npc' });
+      } else if (it.kind === 'door' || it.kind === 'ship') {
+        extras.push({ x: pos.x, z: pos.z, kind: 'exit' });
+      } else {
+        extras.push({ x: pos.x, z: pos.z, kind: 'item' });
+      }
+    }
+    this.minimap.update(player, others, extras);
   }
 
   private allRequiredDone(stage: StageHandle): boolean {

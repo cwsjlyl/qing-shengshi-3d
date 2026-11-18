@@ -10,10 +10,11 @@ import type { Joystick } from '../ui/joystick';
 import type { HUD } from '../ui/hud';
 import { createPlayer } from '../player/player';
 import { buildExitMarker } from '../props/props';
-import { dressCourtyard } from '../props/dressPalace';
+import { applyPalacePalette, dressCourtyard, retintStoneBridges } from '../props/dressPalace';
 import { dressKangxiPack, MESHY_COURT } from '../props/packDetail';
 import { npcInteractable, pointInteractable } from './helpers';
 import type { StageHandle } from './types';
+import { rect, type MinimapSchema } from '../ui/minimap';
 
 export async function loadKangxiStage(
   scene: Scene,
@@ -24,11 +25,11 @@ export async function loadKangxiStage(
   onProgress?: (p: number, msg: string) => void
 ): Promise<StageHandle> {
   onProgress?.(0.05, '正在載入康熙庭院……');
-  addSkyDome(scene, '#6EA8C8', '#D7C6A0', 280);
+  addSkyDome(scene, '#3A7FCB', '#B7D4EE', 280);
   const { shadows } = addWarmPalaceLights(scene);
-  scene.fogColor = new Color3(0.78, 0.76, 0.7);
-  scene.fogStart = 28;
-  scene.fogEnd = 90;
+  scene.fogColor = new Color3(0.7, 0.8, 0.88);
+  scene.fogStart = 40;
+  scene.fogEnd = 120;
 
   const placed: PlacedModel[] = [];
   const court = await placeModel(scene, MODEL.courtyard, {
@@ -42,6 +43,8 @@ export async function loadKangxiStage(
   onProgress?.(0.55, '正在布置庭院細節……');
   placed.push(...(await dressKangxiPack(scene)));
   enrichImportedMaterials(scene);
+  retintStoneBridges(scene);
+  applyPalacePalette(scene);
   onProgress?.(0.7, '正在布置人物……');
 
   const grid = new WalkGrid(0.42);
@@ -54,18 +57,31 @@ export async function loadKangxiStage(
   // Gate tower piers, leave a central passage
   grid.addSolid(-4.2, -1.15, 11.5, 15.0, 0, 11);
   grid.addSolid(1.15, 4.2, 11.5, 15.0, 0, 11);
-  // Ceremonial hall
+  // Ceremonial hall interior. Front central stairs are decorative and
+  // lead into this solid, so they stay at ground height (no ramp) to
+  // avoid trapping the player on the 台基.
   grid.addSolid(-5.2, 5.2, -13.2, -4.15, 0, 13);
+  // Raised 台基 wings / cheeks (measured base X[-7.57,7.57] Z[-13.57,-1.10]),
+  // leaving a central stair gap around |x|<2.2. Does not extend onto the
+  // empty cobble north of z≈-1.1 (stool at 7.2,-0.6 stays clear).
+  grid.addSolid(-7.55, -5.2, -13.2, -1.15, 0, 2.2);
+  grid.addSolid(5.2, 7.55, -13.2, -1.15, 0, 2.2);
+  grid.addSolid(-5.2, -2.2, -4.15, -1.15, 0, 2.2);
+  grid.addSolid(2.2, 5.2, -4.15, -1.15, 0, 2.2);
   // Lotus pond, with a bridge gap near x=-4, z=6.2–8.3
   grid.addSolid(-8.35, -4.5, -0.35, 6.15);
   grid.addSolid(-2.0, 0.35, -0.35, 6.15);
   grid.addSolid(-8.35, -4.75, 6.15, 8.4);
   grid.addSolid(-2.0, 0.35, 6.15, 8.4);
-  // Rockery
-  grid.addSolid(6.7, 9.3, 4.8, 7.3);
-  grid.addSolid(1.2, 8.6, 0.2, 7.8);
-  // Well / trees west-south
-  grid.addSolid(-11.2, -8.4, -9.5, -5.4);
+  // Actual remaining rockery outcrop (measured Babylon AABB
+  // X[6.490, 9.708] Z[4.782, 7.124]). The previous second box
+  // (1.2, 8.6, 0.2, 7.8) was leftover after the visual rockery was
+  // reduced and blocked a large stretch of empty east-courtyard cobble.
+  grid.addSolid(6.45, 9.75, 4.74, 7.16, 0, 3.0);
+  // Well + the bamboo clump beside it (measured well X[-10.53,-8.04]
+  // Z[-7.30,-5.70]; bamboo X[-10.29,-8.56] Z[-9.06,-6.96]). Tightened
+  // off the surrounding cobble.
+  grid.addSolid(-10.65, -7.95, -9.20, -5.58, 0, 3.0);
 
   // Meshy moon-gate wall wings (opening stays walkable) and pavilion footprint.
   const gate = MESHY_COURT.moonGate;
@@ -116,11 +132,15 @@ export async function loadKangxiStage(
   grid.addCameraSolid(-14.4, -11.6, 2.0, 6.5, 2.5, 6.5);
   grid.addCameraSolid(10.2, 14.4, -6.5, -1.5, 2.5, 7.5);
 
+  // East step-flight measured X[-8.000,-5.800] Z[8.900,13.100], high at
+  // the west (platform) end, low at the east. Slightly widened on the
+  // approach and sides so the player centre can enter the volume; height
+  // is also sampled under the feet (ramps only).
   grid.addRamp({
     minX: -8.07,
-    maxX: -5.8,
-    minZ: 8.9,
-    maxZ: 13.1,
+    maxX: -5.5,
+    minZ: 8.75,
+    maxZ: 13.25,
     y0: 0,
     y1: 1.1,
     axis: 'x',
@@ -160,6 +180,38 @@ export async function loadKangxiStage(
     facing: Math.PI - 0.32
   }, 3.8);
 
+
+  const minimap: MinimapSchema = {
+    bounds: { minX: -15.5, maxX: 15.5, minZ: -15.5, maxZ: 15.5 },
+    rects: [
+      rect(-15.2, -13.2, -15.2, 15.2),
+      rect(13.2, 15.2, -15.2, 15.2),
+      rect(-15.2, 15.2, -15.2, -13.2),
+      rect(-15.2, -5.4, 13.2, 15.2),
+      rect(5.4, 15.2, 13.2, 15.2),
+      rect(-4.2, -1.15, 11.5, 15.0),
+      rect(1.15, 4.2, 11.5, 15.0),
+      rect(-7.55, 7.55, -13.5, -1.15),
+      rect(-11.93, -8.07, 5.07, 12.93, 'platform'),
+      rect(-8.07, -5.5, 8.75, 13.25, 'platform'),
+      rect(-8.35, -4.5, -0.35, 6.15, 'water'),
+      rect(-2.0, 0.35, -0.35, 6.15, 'water'),
+      rect(-8.35, -4.75, 6.15, 8.4, 'water'),
+      rect(-2.0, 0.35, 6.15, 8.4, 'water'),
+      rect(6.45, 9.75, 4.74, 7.16),
+      rect(-10.65, -7.95, -9.20, -5.58),
+      rect(9.0, 9.6, -3.0, -0.6),
+      rect(10.7, 12.3, -9.0, -7.4)
+    ],
+    items: [
+      { x: 7.2, z: -0.6 },
+      { x: 10.2, z: -6.2 },
+      { x: 6.0, z: -4.4 },
+      { x: 9.3, z: -1.8 },
+      { x: 0, z: -3.35, kind: 'exit' }
+    ]
+  };
+
   finalizeShadows(scene, shadows);
   onProgress?.(1, '準備就緒');
 
@@ -182,6 +234,7 @@ export async function loadKangxiStage(
     quizDone: false,
     passwordDone: false,
     strengthAt: () => ({ value: 0.78, kind: 'strong' as const }),
+    minimap,
     dispose
   };
 }

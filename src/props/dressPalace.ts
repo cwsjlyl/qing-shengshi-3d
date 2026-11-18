@@ -12,14 +12,14 @@ import {
 } from '@babylonjs/core';
 import { PALETTE, stdMat } from '../engine/materials';
 
-/** Warm cream/sand cobble with darker grout. Irregular stones so 4m pack modules do not read as large square tiles. */
+/** Grey-blue courtyard brick with dark grout — not cream/sand cobble. */
 export function makeCobbleTexture(scene: Scene, uScale = 8, vScale = 8): Texture {
   const size = 512;
   const tex = new DynamicTexture('cobble-tex', { width: size, height: size }, scene, false);
   const ctx = tex.getContext();
-  ctx.fillStyle = '#7A5A32';
+  ctx.fillStyle = '#3A4248';
   ctx.fillRect(0, 0, size, size);
-  const palettes = ['#F3E4C0', '#EAD6B0', '#F0DDB8', '#E6CFA4', '#F6E8C8', '#E8D4AC', '#F0E0BE', '#DCC8A0', '#E8D8B4'];
+  const palettes = ['#8A9198', '#7C848C', '#939AA2', '#6E767E', '#868E96', '#798088', '#9AA3A8', '#747C84', '#8E969C'];
   let seed = 17;
   const rnd = () => {
     seed = (seed * 16807 + 13) % 2147483647;
@@ -37,11 +37,10 @@ export function makeCobbleTexture(scene: Scene, uScale = 8, vScale = 8): Texture
       ctx.fillStyle = colr;
       roundRect(ctx, px, py, w, h, 2 + rnd() * 2);
       ctx.fill();
-      // Soft inner shade so each stone has a little volume.
-      ctx.fillStyle = 'rgba(80,50,20,0.14)';
+      ctx.fillStyle = 'rgba(30,36,42,0.16)';
       roundRect(ctx, px + w * 0.15, py + h * 0.45, w * 0.7, h * 0.45, 2);
       ctx.fill();
-      ctx.strokeStyle = 'rgba(50,32,12,0.55)';
+      ctx.strokeStyle = 'rgba(28,32,36,0.62)';
       ctx.lineWidth = 1.4;
       roundRect(ctx, px, py, w, h, 2);
       ctx.stroke();
@@ -75,9 +74,12 @@ function roundRect(ctx: { beginPath(): void; moveTo(x: number, y: number): void;
  * Must run before freezeStatic on the courtyard root.
  */
 export function dressCourtyard(scene: Scene, court: TransformNode): void {
+  // Detach the small arched bridge onto its own grey-veined material before
+  // any shared stone / pond-edge ochre tint can recolour it.
+  retintStoneBridges(scene, court);
   const cobble = makeCobbleTexture(scene);
   const pavingMat = new PBRMaterial('paving-cobble', scene);
-  pavingMat.albedoColor = new Color3(0.96, 0.88, 0.68);
+  pavingMat.albedoColor = new Color3(0.72, 0.76, 0.78);
   pavingMat.albedoTexture = cobble;
   pavingMat.roughness = 0.88;
   pavingMat.metallic = 0;
@@ -97,24 +99,6 @@ export function dressCourtyard(scene: Scene, court: TransformNode): void {
     const combined = name + ' ' + parentName;
     if (combined.includes('courtyard-paving-module')) {
       mesh.material = pavingMat;
-    }
-    if (combined.includes('stone-balustrade') || combined.includes('garden-stone-bench') || combined.includes('pond-edge')) {
-      const mat = mesh.material;
-      if (mat instanceof PBRMaterial) {
-        mat.albedoColor = new Color3(0.82, 0.68, 0.48);
-        mat.roughness = Math.max(mat.roughness ?? 0.7, 0.8);
-        if (mat.albedoTexture) mat.albedoTexture.level = 0.45;
-        mat.environmentIntensity = 0.12;
-      }
-    }
-    if (combined.includes('ceremonial-hall') && (name.endsWith('_0') || combined.includes('stone'))) {
-      const mat = mesh.material;
-      if (mat instanceof PBRMaterial && (mat.name.toLowerCase().includes('stone') || name.endsWith('_0'))) {
-        mat.albedoColor = new Color3(0.78, 0.64, 0.44);
-        mat.roughness = Math.max(mat.roughness ?? 0.7, 0.82);
-        if (mat.albedoTexture) mat.albedoTexture.level = 0.42;
-        mat.environmentIntensity = 0.1;
-      }
     }
     if (combined.includes('hanging-silk-lantern') && (combined.includes('paper') || name.includes('paper'))) {
       mesh.material = paperRed;
@@ -226,7 +210,7 @@ function addPavingOverlay(scene: Scene, parent: TransformNode): void {
     const tex = makeCobbleTexture(scene, w / 0.9, d / 0.9);
     tex.name = name + '-tex';
     const m = new PBRMaterial(name + '-mat', scene);
-    m.albedoColor = new Color3(0.93, 0.84, 0.64);
+    m.albedoColor = new Color3(0.68, 0.72, 0.74);
     m.albedoTexture = tex;
     m.roughness = 0.92;
     m.metallic = 0;
@@ -508,4 +492,185 @@ export function dressFarmland(scene: Scene, cx: number, cz: number): TransformNo
   });
 
   return root;
+}
+
+
+/** Cool grey stone with black veins / grout, used only on small stone bridges. */
+export function retintStoneBridges(scene: Scene, root?: TransformNode): void {
+  const meshes = root ? root.getChildMeshes(false) : scene.meshes;
+  let mat: PBRMaterial | null = null;
+  for (const mesh of meshes) {
+    const label = `${mesh.name} ${mesh.parent?.name ?? ''}`.toLowerCase();
+    if (!/(^|[-_\s\/])(bridge|arched-stone-bridge)($|[-_\s\/])/.test(label) && !label.includes('arched-stone-bridge') && !label.includes('coast-bridge') && !/stone-bridge/.test(label)) {
+      continue;
+    }
+    if (/flagship|boat|ship|deck|player|char:/.test(label)) continue;
+    if (!mat) mat = makeGreyVeinStone(scene);
+    mesh.material = mat;
+  }
+}
+
+function makeGreyVeinStone(scene: Scene): PBRMaterial {
+  const existing = scene.getMaterialByName('bridge-grey-stone');
+  if (existing instanceof PBRMaterial) return existing;
+  const size = 512;
+  const tex = new DynamicTexture('bridge-grey-vein-tex', { width: size, height: size }, scene, false);
+  const ctx = tex.getContext();
+  ctx.fillStyle = '#8A8D8C';
+  ctx.fillRect(0, 0, size, size);
+  let seed = 41;
+  const rnd = () => {
+    seed = (seed * 48271) % 2147483647;
+    return seed / 2147483647;
+  };
+  // Subtle cooler / darker stones so the slab does not read as one flat grey.
+  for (let i = 0; i < 28; i++) {
+    const x = rnd() * size;
+    const y = rnd() * size;
+    const rw = 40 + rnd() * 90;
+    const rh = 28 + rnd() * 70;
+    const g = 108 + Math.floor(rnd() * 36);
+    ctx.fillStyle = `rgba(${g - 8},${g},${g + 4},0.28)`;
+    ctx.beginPath();
+    ctx.moveTo(x + rw, y);
+    ctx.quadraticCurveTo(x + rw, y + rh, x, y + rh);
+    ctx.quadraticCurveTo(x - rw, y + rh, x - rw, y);
+    ctx.quadraticCurveTo(x - rw, y - rh, x, y - rh);
+    ctx.quadraticCurveTo(x + rw, y - rh, x + rw, y);
+    ctx.closePath();
+    ctx.fill();
+  }
+  // Black grain / hairline veins
+  for (let i = 0; i < 18; i++) {
+    let x = rnd() * size;
+    let y = rnd() * size;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    const segs = 6 + Math.floor(rnd() * 6);
+    for (let s = 0; s < segs; s++) {
+      x += (rnd() - 0.45) * 90;
+      y += (rnd() - 0.5) * 70;
+      ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = `rgba(8,8,10,${0.55 + rnd() * 0.35})`;
+    ctx.lineWidth = 1.2 + rnd() * 2.4;
+    ctx.stroke();
+  }
+  // Dark grout / joint lines, slightly irregular grid
+  ctx.strokeStyle = 'rgba(6,6,8,0.82)';
+  ctx.lineWidth = 2.4;
+  for (let i = 1; i < 8; i++) {
+    const x = (i * size) / 8 + (rnd() - 0.5) * 10;
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x + (rnd() - 0.5) * 16, size);
+    ctx.stroke();
+    const y = (i * size) / 8 + (rnd() - 0.5) * 10;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(size, y + (rnd() - 0.5) * 16);
+    ctx.stroke();
+  }
+  tex.update(false);
+  tex.wrapU = Texture.WRAP_ADDRESSMODE;
+  tex.wrapV = Texture.WRAP_ADDRESSMODE;
+  tex.uScale = 3;
+  tex.vScale = 3;
+  tex.anisotropicFilteringLevel = 4;
+  const mat = new PBRMaterial('bridge-grey-stone', scene);
+  mat.albedoColor = new Color3(0.72, 0.74, 0.73);
+  mat.albedoTexture = tex;
+  mat.roughness = 0.92;
+  mat.metallic = 0;
+  mat.environmentIntensity = 0.12;
+  mat.specularIntensity = 0.12;
+  return mat;
+}
+
+
+const PALETTE_SKIP =
+  /sky|sea|ql-land|ql-sea|ql-beach|ql-farm|ql-battle|char:|\/player|tripo-|meshy-|bridge-|lantern-paper|title-haze|tuft|verge|hem|sleeve|robe|head|iris|brow|eye/i;
+const PROP_GLAZE =
+  /altar|tea|desk|ink|scroll|chest|throne|incense|lantern|peony|stool|bench|guqin|cushion|parasol|cauldron|brazier|bell|drum|brush|inkstone/i;
+
+/**
+ * Assign unique per-role materials so shared pack `stone` / `plaster` / `glaze`
+ * can read as 汉白玉, 红墙 and 黃琉璃 at a few metres, not one ochre wash.
+ * Does not touch the grey-veined bridge material.
+ */
+export function applyPalacePalette(scene: Scene): void {
+  const mats = palacePaletteMaterials(scene);
+  for (const mesh of scene.meshes) {
+    if (!mesh.isEnabled() || mesh.isDisposed()) continue;
+    const matName = (mesh.material?.name ?? '').toLowerCase();
+    const label = `${mesh.name} ${mesh.parent?.name ?? ''} ${matName}`;
+    if (PALETTE_SKIP.test(label)) continue;
+    if (matName.startsWith('bridge-') || matName.startsWith('palette-') || matName.startsWith('pave-') || matName === 'paving-cobble') {
+      continue;
+    }
+
+    if (matName.includes('plaster')) {
+      mesh.material = mats.vermilion;
+      continue;
+    }
+    if (matName.includes('glaze')) {
+      if (!PROP_GLAZE.test(label)) mesh.material = mats.yellowRoof;
+      continue;
+    }
+    if (/roof-cassette|roof-ridge|dragon-roof-finial|roof-finial/.test(label) && (matName.includes('glaze') || !/timber|wood|bronze/.test(matName))) {
+      if (matName.includes('glaze')) mesh.material = mats.yellowRoof;
+      continue;
+    }
+    if (matName.includes('lacquer')) {
+      mesh.material = mats.lacquer;
+      continue;
+    }
+    if (matName.includes('timber') || /(^|\/|_)wood$/.test(matName) || matName === 'wood') {
+      mesh.material = mats.darkWood;
+      continue;
+    }
+    if (matName.includes('stone') || matName.includes('paving') || matName.includes('plaster')) {
+      if (/paving|pave-|hall-floor|flagstone/.test(label)) {
+        mesh.material = mats.greyBrick;
+      } else if (/rockery|scholars-stone/.test(label)) {
+        mesh.material = mats.rockGrey;
+      } else if (/arched-stone-bridge|coast-bridge|stone-bridge/.test(label)) {
+        continue;
+      } else {
+        // Wall bases, terraces, steps, rails, pond rims, hall/gate plinths: 汉白玉.
+        mesh.material = mats.marble;
+      }
+    }
+  }
+}
+
+function palacePaletteMaterials(scene: Scene): {
+  vermilion: PBRMaterial;
+  yellowRoof: PBRMaterial;
+  marble: PBRMaterial;
+  greyBrick: PBRMaterial;
+  darkWood: PBRMaterial;
+  lacquer: PBRMaterial;
+  rockGrey: PBRMaterial;
+} {
+  const take = (name: string, hex: Color3, roughness: number, metallic = 0, env = 0.2) => {
+    const hit = scene.getMaterialByName(name);
+    if (hit instanceof PBRMaterial) return hit;
+    const m = new PBRMaterial(name, scene);
+    m.albedoColor = hex;
+    m.roughness = roughness;
+    m.metallic = metallic;
+    m.environmentIntensity = env;
+    m.specularIntensity = metallic > 0 ? 0.35 : 0.14;
+    return m;
+  };
+  return {
+    vermilion: take('palette-vermilion', new Color3(0.62, 0.15, 0.11), 0.62, 0, 0.16),
+    yellowRoof: take('palette-yellow-roof', new Color3(0.84, 0.6, 0.1), 0.36, 0.14, 0.28),
+    marble: take('palette-marble', new Color3(0.8, 0.81, 0.83), 0.72, 0, 0.2),
+    greyBrick: take('palette-grey-brick', new Color3(0.62, 0.65, 0.68), 0.88, 0, 0.14),
+    darkWood: take('palette-dark-wood', new Color3(0.26, 0.15, 0.09), 0.7, 0, 0.12),
+    lacquer: take('palette-lacquer', new Color3(0.7, 0.11, 0.09), 0.38, 0.04, 0.2),
+    rockGrey: take('palette-rock-grey', new Color3(0.46, 0.49, 0.47), 0.86, 0, 0.14)
+  };
 }

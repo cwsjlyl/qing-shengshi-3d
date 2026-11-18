@@ -19,8 +19,10 @@ import type { HUD } from '../ui/hud';
 import { createPlayer } from '../player/player';
 import { buildExitMarker, buildGoldIngots, buildHallFloor } from '../props/props';
 import { dressYongzhengPack } from '../props/packDetail';
+import { applyPalacePalette } from '../props/dressPalace';
 import { npcInteractable, pointInteractable } from './helpers';
 import type { StageHandle } from './types';
+import { rect, type MinimapSchema } from '../ui/minimap';
 
 export async function loadYongzhengStage(
   scene: Scene,
@@ -31,11 +33,11 @@ export async function loadYongzhengStage(
   onProgress?: (p: number, msg: string) => void
 ): Promise<StageHandle> {
   onProgress?.(0.05, '正在載入雍正大殿……');
-  addSkyDome(scene, '#D4A86A', '#EFD6A8', 280);
+  addSkyDome(scene, '#3E86D0', '#C0D8EE', 280);
   const { shadows } = addWarmPalaceLights(scene);
-  scene.fogColor = hexColor('#D8B88A');
-  scene.fogStart = 36;
-  scene.fogEnd = 100;
+  scene.fogColor = hexColor('#B8C6D2');
+  scene.fogStart = 42;
+  scene.fogEnd = 120;
 
   const placed: PlacedModel[] = [];
   const put = async (
@@ -90,7 +92,11 @@ export async function loadYongzhengStage(
 
   await put(MODEL.terrace, 'dais-1', 0, -6, 0, -0.05);
   await put(MODEL.terrace, 'dais-2', 0, -8, 0, -0.05);
-  await put(MODEL.steps, 'dais-steps', 0, -4.1, Math.PI, -0.05);
+  // terrace-steps.glb slopes down along local +Z (high at local Z=-0.88,
+  // low at +1.32). rotY=π used to point the high end toward the player.
+  // Place at z=-3.77, rotY=0 so the high end sits under the dais (z≈-4.65)
+  // and the low end meets the aisle in front of the officials (z≈-2.45).
+  await put(MODEL.steps, 'dais-steps', 0, -3.77, 0, -0.05);
   await put(MODEL.throne, 'yz-throne', 0, -7.4, 0, 1.1);
   await put(MODEL.footstool, 'yz-foot', 0, -6.1, 0, 1.1);
   await put(MODEL.screen, 'yz-screen', 0, -9.1, Math.PI, 1.1);
@@ -139,10 +145,10 @@ export async function loadYongzhengStage(
   grid.addSolid(-5.4, 5.4, -17.2, -10.2, 0, 13);
   grid.addPlatform(-2.05, 2.05, -10.0, -4.0, 1.1);
   grid.addRamp({
-    minX: -1.6,
-    maxX: 1.6,
-    minZ: -4.15,
-    maxZ: -2.4,
+    minX: -2.25,
+    maxX: 2.25,
+    minZ: -4.25,
+    maxZ: -2.25,
     y0: 0,
     y1: 1.1,
     axis: 'z',
@@ -207,7 +213,32 @@ export async function loadYongzhengStage(
     facing: Math.PI
   }, 3.8);
 
+
+  const minimap: MinimapSchema = {
+    bounds: { minX: -19.5, maxX: 19.5, minZ: -19.5, maxZ: 19.5 },
+    rects: [
+      rect(-19.2, -17.2, -19.2, 19.2),
+      rect(17.2, 19.2, -19.2, 19.2),
+      rect(-19.2, -4.0, 17.2, 19.2),
+      rect(4.0, 19.2, 17.2, 19.2),
+      rect(-19.2, -2.4, -19.2, -17.2),
+      rect(2.4, 19.2, -19.2, -17.2),
+      rect(-4.2, -1.15, 14.6, 18.4),
+      rect(1.15, 4.2, 14.6, 18.4),
+      rect(-5.4, 5.4, -17.2, -10.2),
+      rect(-2.05, 2.05, -10.0, -4.0, 'platform'),
+      rect(-2.25, 2.25, -4.25, -2.25, 'platform')
+    ],
+    items: [
+      { x: -9.0, z: -2.4 },
+      { x: -9.0, z: -1.2 },
+      { x: 8.5, z: 1.0 },
+      { x: 0, z: -16.6, kind: 'exit' }
+    ]
+  };
+
   enrichImportedMaterials(scene);
+  applyPalacePalette(scene);
   finalizeShadows(scene, shadows);
   onProgress?.(1, '準備就緒');
 
@@ -237,6 +268,7 @@ export async function loadYongzhengStage(
     quizDone: false,
     passwordDone: false,
     strengthAt: () => ({ value: 0.88, kind: 'strong' }),
+    minimap,
     dispose
   };
 }

@@ -19,12 +19,13 @@ import {
   buildLandGround,
   buildSea
 } from '../props/props';
-import { dressFarmland, tameStandingLanterns } from '../props/dressPalace';
+import { applyPalacePalette, dressFarmland, retintStoneBridges, tameStandingLanterns } from '../props/dressPalace';
 import { protectDistantPavilions } from '../props/packDetail';
 import { buildEscortJunk, buildImperialBarge, type Barge } from '../props/imperialBarge';
 import { attachMeshyFlagshipVisual } from '../props/meshyFlagship';
 import { npcInteractable, pointInteractable } from './helpers';
 import type { StageHandle } from './types';
+import { rect, type MinimapSchema } from '../ui/minimap';
 import { TransformNode } from '@babylonjs/core';
 
 export async function loadQianlongStage(
@@ -36,11 +37,11 @@ export async function loadQianlongStage(
   onProgress?: (p: number, msg: string) => void
 ): Promise<StageHandle> {
   onProgress?.(0.05, '正在載入乾隆戶外場景……');
-  addSkyDome(scene, '#5E9EBE', '#D2C4A0', 420);
+  addSkyDome(scene, '#2F74C4', '#A8CCE8', 420);
   const { shadows } = addWarmPalaceLights(scene);
-  scene.fogColor = hexColor('#C8BCA0');
-  scene.fogStart = 58;
-  scene.fogEnd = 180;
+  scene.fogColor = hexColor('#9CBED4');
+  scene.fogStart = 80;
+  scene.fogEnd = 220;
 
   // Land ends at x≈18 so it never covers the sea. Sea starts at x=17.
   const land = buildLandGround(scene, 'ql-land', 58, 80, {
@@ -336,9 +337,33 @@ export async function loadQianlongStage(
   }, 5.4);
 
   enrichImportedMaterials(scene);
+  retintStoneBridges(scene);
+  applyPalacePalette(scene);
   protectDistantPavilions(scene);
   finalizeShadows(scene, shadows);
   onProgress?.(1, '準備就緒');
+
+  const minimap: MinimapSchema = {
+    bounds: { minX: -46, maxX: 48, minZ: -28, maxZ: 52 },
+    rects: [
+      rect(-46, -44, -28, 52),
+      rect(-46, 18, 50, 52),
+      rect(-46, 18, -28, -26),
+      rect(18.5, 90, -40, 0.15, 'water'),
+      rect(18.5, 90, 4.25, 50, 'water'),
+      rect(-4.2, 4.2, 38.8, 44.0),
+      rect(-31.5, -24.8, 7.2, 13.2),
+      rect(13.9, 18.5, 9.9, 14.5),
+      rect(18, 24.6, 0.15, 4.25, 'platform'),
+      rect(24, 48, 0.5, 15.5)
+    ],
+    items: [
+      { x: 22, z: 2.2 },
+      { x: 15.4, z: 5.4 },
+      { x: 14, z: 18 },
+      { x: 24.2, z: 3.2, kind: 'exit' }
+    ]
+  };
 
   let t = 0;
   const update = (dt: number) => {
@@ -393,6 +418,7 @@ export async function loadQianlongStage(
     passwordDone: false,
     update,
     strengthAt,
+    minimap,
     dispose
   };
 }

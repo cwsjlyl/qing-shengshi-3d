@@ -213,18 +213,18 @@ export function protectDistantPavilions(scene: Scene): void {
     if (n.includes('meshy-')) continue;
     const mat = mesh.material;
     if (!(mat instanceof PBRMaterial)) continue;
+    const mn = mat.name.toLowerCase();
+    if (mn.startsWith('palette-') || mn.startsWith('bridge-') || mn.startsWith('meshy-')) {
+      mat.environmentIntensity = Math.min(mat.environmentIntensity ?? 0.22, 0.14);
+      mesh.applyFog = true;
+      continue;
+    }
     try {
       mat.unfreeze();
     } catch {
       /* ok */
     }
-    mat.environmentIntensity = Math.min(mat.environmentIntensity ?? 0.22, 0.12);
-    const a = mat.albedoColor;
-    a.r = Math.min(0.78, a.r * 0.86 + 0.08);
-    a.g = Math.min(0.66, a.g * 0.8 + 0.06);
-    a.b = Math.min(0.48, a.b * 0.7 + 0.04);
-    if (mat.albedoTexture) mat.albedoTexture.level = Math.min(mat.albedoTexture.level ?? 1, 0.7);
-    mat.emissiveColor = new Color3(0.07, 0.055, 0.03);
+    mat.environmentIntensity = Math.min(mat.environmentIntensity ?? 0.22, 0.14);
     mesh.applyFog = true;
   }
 }

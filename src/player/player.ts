@@ -2,8 +2,10 @@ import { AbstractMesh, ArcRotateCamera, Scene, TransformNode, Vector3 } from '@b
 import { buildCharacter, type Character } from '../characters/buildCharacter';
 import type { WalkGrid } from '../engine/collision';
 import type { Input } from '../engine/input';
+import { OcclusionFader } from '../engine/occlusionFade';
 import type { Joystick } from '../ui/joystick';
 import type { HUD } from '../ui/hud';
+import { cameraRelativeMove } from './moveMath';
 
 export type PlayerCtl = {
   character: Character;
@@ -24,6 +26,25 @@ const DEFAULT_RADIUS = 6.4;
 const DEFAULT_BETA = 1.36;
 const TARGET_HEIGHT = 1.12;
 const LOOK_AHEAD = 1.7;
+const FOOT_R = 0.32;
+const TARGET_SMOOTH = 7.5;
+const LOOK_YAW_SMOOTH = 5.2;
+const RADIUS_IN = 6.5;
+const RADIUS_OUT = 3.2;
+const BETA_SMOOTH = 6;
+const OCC_HOLD = 0.22;
+const OCC_MARGIN = 0.4;
+
+function expLerp(cur: number, dest: number, rate: number, dt: number): number {
+  return cur + (dest - cur) * (1 - Math.exp(-rate * dt));
+}
+
+function lerpAngle(a: number, b: number, t: number): number {
+  let d = b - a;
+  while (d > Math.PI) d -= Math.PI * 2;
+  while (d < -Math.PI) d += Math.PI * 2;
+  return a + d * t;
+}
 
 export async function createPlayer(
   scene: Scene,
@@ -36,7 +57,7 @@ export async function createPlayer(
   speed = 4.2
 ): Promise<PlayerCtl> {
   const character = await buildCharacter(scene, { id: 'player', kind: 'player' });
-  const y0 = spawn.y ?? grid.heightAt(spawn.x, spawn.z);
+  const y0 = spawn.y ?? grid.heightAt(spawn.x, spawn.z, FOOT_R);
   character.root.position.set(spawn.x, y0, spawn.z);
   character.setFacing(spawn.facing ?? 0);
   character.root.computeWorldMatrix(true);
@@ -46,10 +67,10 @@ export async function createPlayer(
     mesh.alwaysSelectAsActiveMesh = true;
   }
 
-  const facing = spawn.facing ?? 0;
+  const facing0 = spawn.facing ?? 0;
   const camera = new ArcRotateCamera(
     'follow',
-    -(facing + Math.PI / 2),
+    -(facing0 + Math.PI / 2),
     DEFAULT_BETA,
     DEFAULT_RADIUS,
     new Vector3(spawn.x, y0 + TARGET_HEIGHT, spawn.z),
@@ -66,41 +87,66 @@ export async function createPlayer(
   camera.inputs.clear();
   camera.minZ = 0.12;
   camera.maxZ = 400;
-  camera.inertia = 0.5;
-  // Nudge the aim point slightly up so the player lands in the lower-middle of the frame
-  // (below the top HUD, above the joystick / talk button).
-  // Small view-space lift so the character sits in the lower-middle of the frame.
+  // Own damping: the stock inertia fights direct radius/target writes and pops.
+  camera.inertia = 0;
   camera.targetScreenOffset.y = 0.22;
   scene.activeCamera = camera;
 
   let locked = false;
   let desiredRadius = DEFAULT_RADIUS;
+  let desiredBeta = DEFAULT_BETA;
+  let camRadius = DEFAULT_RADIUS;
+  let lookYaw = facing0;
+  let lookAheadAmt = LOOK_AHEAD;
   let talkFraming = false;
+  let easeFromTalk = 0;
+  let occHold = 0;
+  let pulledRadius = DEFAULT_RADIUS;
   const target = new Vector3(spawn.x, y0 + TARGET_HEIGHT, spawn.z);
+  const fader = new OcclusionFader();
+  const chest = new Vector3();
 
   const getPosition = () => character.root.getAbsolutePosition();
 
+  const snapFollow = () => {
+    const p = character.root.getAbsolutePosition();
+    lookYaw = character.root.rotation.y;
+    lookAheadAmt = LOOK_AHEAD * 0.35;
+    target.set(p.x + Math.sin(lookYaw) * lookAheadAmt, p.y + TARGET_HEIGHT, p.z + Math.cos(lookYaw) * lookAheadAmt);
+  };
+
   const setPosition = (x: number, y: number, z: number) => {
     character.root.position.set(x, y, z);
-    refreshFollowTarget();
+    snapFollow();
     aim(target);
   };
 
   const setView = (alpha: number, beta: number, radius: number) => {
     camera.alpha = alpha;
-    camera.beta = Math.min(camera.upperBetaLimit!, Math.max(camera.lowerBetaLimit!, beta));
+    const b = Math.min(camera.upperBetaLimit!, Math.max(camera.lowerBetaLimit!, beta));
+    desiredBeta = b;
+    camera.beta = b;
     desiredRadius = Math.min(camera.upperRadiusLimit!, Math.max(camera.lowerRadiusLimit!, radius));
+    camRadius = desiredRadius;
     camera.radius = desiredRadius;
+    pulledRadius = desiredRadius;
   };
 
-  function refreshFollowTarget(): void {
+  function smoothFollowTarget(dt: number, moving: boolean, facingYaw: number): void {
     const p = character.root.getAbsolutePosition();
-    const yaw = character.root.rotation.y;
-    target.set(
-      p.x + Math.sin(yaw) * LOOK_AHEAD,
-      p.y + TARGET_HEIGHT,
-      p.z + Math.cos(yaw) * LOOK_AHEAD
-    );
+    const yawK = 1 - Math.exp(-LOOK_YAW_SMOOTH * dt);
+    if (moving) {
+      lookYaw = lerpAngle(lookYaw, facingYaw, yawK);
+      lookAheadAmt = expLerp(lookAheadAmt, LOOK_AHEAD, 5.5, dt);
+    } else {
+      lookAheadAmt = expLerp(lookAheadAmt, LOOK_AHEAD * 0.4, 2.4, dt);
+    }
+    const dx = p.x + Math.sin(lookYaw) * lookAheadAmt;
+    const dy = p.y + TARGET_HEIGHT;
+    const dz = p.z + Math.cos(lookYaw) * lookAheadAmt;
+    target.x = expLerp(target.x, dx, TARGET_SMOOTH, dt);
+    target.y = expLerp(target.y, dy, TARGET_SMOOTH, dt);
+    target.z = expLerp(target.z, dz, TARGET_SMOOTH, dt);
   }
 
   /** Move the aim point without letting Babylon rebuild alpha/beta/radius. */
@@ -108,18 +154,25 @@ export async function createPlayer(
     camera.setTarget(at, false, true, true);
   }
 
-  const savedLimits = { loB: camera.lowerBetaLimit, upB: camera.upperBetaLimit, loR: camera.lowerRadiusLimit, upR: camera.upperRadiusLimit };
+  const savedLimits = {
+    loB: camera.lowerBetaLimit,
+    upB: camera.upperBetaLimit,
+    loR: camera.lowerRadiusLimit,
+    upR: camera.upperRadiusLimit
+  };
 
   const hiddenTalk: Array<{ mesh: AbstractMesh; vis: boolean }> = [];
   const savedPlayer = { x: 0, y: 0, z: 0 };
 
-  const clutterName = /bamboo|rockery|scholars-stone|peony|planter|lotus-cluster|lantern|pavilion|bell|drum|stool|bench|incense|guqin|tea|cushion|balustrade|walkway|plum|bonsai|tuft|verge|flower|column/i;
-  const keepName = /char:|player|paving|palace-wall|ceremonial-hall|gate-tower|throne|sky|sea|ql-|hem|chest|head|sleeve|robe|kangxi|yongzheng|qianlong|manchu|han|official|farmer|soldier|heshen/i;
+  const clutterName =
+    /bamboo|rockery|scholars-stone|peony|planter|lotus-cluster|lantern|pavilion|bell|drum|stool|bench|incense|guqin|tea|cushion|balustrade|walkway|plum|bonsai|tuft|verge|flower|column/i;
+  const keepName =
+    /char:|player|paving|palace-wall|ceremonial-hall|gate-tower|throne|sky|sea|ql-|hem|chest|head|sleeve|robe|kangxi|yongzheng|qianlong|manchu|han|official|farmer|soldier|heshen/i;
 
   function hideTalkClutter(cam: Vector3, npc: Vector3): void {
     hiddenTalk.length = 0;
-    const scene = character.root.getScene();
-    for (const mesh of scene.meshes) {
+    const sc = character.root.getScene();
+    for (const mesh of sc.meshes) {
       const label = `${mesh.name} ${mesh.parent?.name ?? ''}`;
       if (keepName.test(label)) continue;
       let center: Vector3;
@@ -134,7 +187,6 @@ export async function createPlayer(
       const onLine = Vector3.Distance(center, mid) < 4.2 && center.y > 0.25;
       if (!(nearNpc || nearCam || onLine)) continue;
       if (!clutterName.test(label) && !onLine) continue;
-      // Don't hide the ground underfoot.
       if (/paving|floor|ground|verge/i.test(label) && center.y < 0.4) continue;
       hiddenTalk.push({ mesh, vis: mesh.isVisible });
       mesh.isVisible = false;
@@ -143,6 +195,7 @@ export async function createPlayer(
 
   const beginTalkFrame = (npc: Vector3, facing?: number) => {
     talkFraming = true;
+    easeFromTalk = 0;
     const p0 = character.root.getAbsolutePosition();
     savedPlayer.x = p0.x;
     savedPlayer.y = p0.y;
@@ -152,12 +205,10 @@ export async function createPlayer(
     const side = new Vector3(Math.cos(yaw), 0, -Math.sin(yaw));
     const head = new Vector3(npc.x, npc.y + 1.48, npc.z);
 
-    // Stand the player beside the subject, never between the camera and the face.
     const sidePos = new Vector3(npc.x + front.x * 1.3 + side.x * 1.8, p0.y, npc.z + front.z * 1.3 + side.z * 1.8);
     const resolved = grid.resolve(sidePos.x, sidePos.z);
-    character.root.position.set(resolved.x, grid.heightAt(resolved.x, resolved.z), resolved.z);
+    character.root.position.set(resolved.x, grid.heightAt(resolved.x, resolved.z, FOOT_R), resolved.z);
 
-    // Medium shot: in front, slightly off to one side, head in the upper third (card sits at the bottom).
     const tryCam = (sideSign: number, dist: number, hy: number) =>
       head.add(front.scale(dist)).add(side.scale(sideSign)).add(new Vector3(0, hy - 1.48, 0));
     const candidates = [
@@ -199,29 +250,86 @@ export async function createPlayer(
     camera.upperBetaLimit = savedLimits.upB;
     camera.lowerRadiusLimit = savedLimits.loR;
     camera.upperRadiusLimit = savedLimits.upR;
-    camera.targetScreenOffset.y = 0.22;
-    camera.targetScreenOffset.x = 0;
     desiredRadius = DEFAULT_RADIUS;
-    refreshFollowTarget();
+    desiredBeta = DEFAULT_BETA;
+    lookYaw = character.root.rotation.y;
+    lookAheadAmt = LOOK_AHEAD * 0.4;
+    const p = character.root.getAbsolutePosition();
+    target.set(p.x, p.y + TARGET_HEIGHT, p.z);
     aim(target);
+    easeFromTalk = 0.55;
   };
+
+  function followCamera(dt: number): void {
+    aim(target);
+
+    const ox = Math.cos(camera.alpha) * Math.sin(camera.beta);
+    const oy = Math.cos(camera.beta);
+    const oz = Math.sin(camera.alpha) * Math.sin(camera.beta);
+    let hitR = desiredRadius;
+    for (let t = 2.2; t <= desiredRadius; t += 0.25) {
+      if (grid.hitsCamera(target.x + ox * t, target.y + oy * t, target.z + oz * t)) {
+        hitR = Math.max(4.2, t - 0.35);
+        break;
+      }
+    }
+    if (hitR < desiredRadius - OCC_MARGIN) {
+      occHold = OCC_HOLD;
+      pulledRadius = hitR;
+    } else if (occHold > 0) {
+      occHold -= dt;
+    } else {
+      pulledRadius = desiredRadius;
+    }
+    const goalR = Math.min(desiredRadius, occHold > 0 ? pulledRadius : desiredRadius, hitR);
+    const rate = goalR < camRadius - 0.05 ? RADIUS_IN : RADIUS_OUT;
+    camRadius = expLerp(camRadius, goalR, rate, dt);
+    camera.radius = camRadius;
+
+    const loB = camera.lowerBetaLimit ?? 1.08;
+    const upB = camera.upperBetaLimit ?? 1.48;
+    const clamped = Math.min(upB, Math.max(loB, desiredBeta));
+    camera.beta = expLerp(camera.beta, clamped, BETA_SMOOTH, dt);
+  }
+
+  function updateFade(dt: number): void {
+    const p = character.root.getAbsolutePosition();
+    chest.set(p.x, p.y + 1.25, p.z);
+    fader.update(scene, camera.position, chest, dt, true);
+  }
 
   const update = (dt: number) => {
     if (talkFraming) {
       character.setMove(0, dt);
+      updateFade(dt);
       return;
     }
+    if (easeFromTalk > 0) {
+      easeFromTalk = Math.max(0, easeFromTalk - dt);
+      const u = 1 - easeFromTalk / 0.55;
+      const k = u * u * (3 - 2 * u);
+      camera.targetScreenOffset.y = -0.28 + (0.22 - -0.28) * k;
+      camera.targetScreenOffset.x = 0.08 * (1 - k);
+    }
+
     if (locked || hud.isModalOpen) {
       character.setMove(0, dt);
       if (!locked) {
-        refreshFollowTarget();
-        aim(target);
+        smoothFollowTarget(dt, false, character.root.rotation.y);
+        followCamera(dt);
+        updateFade(dt);
       }
       return;
     }
+
     const look = input.consumeLook();
-    camera.alpha -= look.yaw;
-    camera.beta = Math.min(camera.upperBetaLimit!, Math.max(camera.lowerBetaLimit!, camera.beta + look.pitch));
+    if (look.yaw || look.pitch) {
+      camera.alpha -= look.yaw;
+      const loB = camera.lowerBetaLimit ?? 1.08;
+      const upB = camera.upperBetaLimit ?? 1.48;
+      camera.beta = Math.min(upB, Math.max(loB, camera.beta + look.pitch));
+      desiredBeta = camera.beta;
+    }
 
     const key = input.keyboardAxis();
     const stick = joystick.value;
@@ -234,14 +342,11 @@ export async function createPlayer(
     }
 
     const dir = camera.getForwardRay().direction;
-    const forward = new Vector3(dir.x, 0, dir.z);
-    if (forward.lengthSquared() > 0.0001) forward.normalize();
-    const right = new Vector3();
-    Vector3.CrossToRef(forward, Vector3.Up(), right);
-    right.normalize();
-    const move = forward.scale(mz).add(right.scale(mx));
+    const moveV = cameraRelativeMove(dir.x, dir.z, mx, mz);
+    const move = new Vector3(moveV.x, 0, moveV.z);
 
     let speedNow = 0;
+    let moving = false;
     if (move.lengthSquared() > 0.0004) {
       move.normalize();
       const step = speed * dt;
@@ -250,30 +355,17 @@ export async function createPlayer(
       const resolved = grid.resolve(nx, nz);
       nx = resolved.x;
       nz = resolved.z;
-      const hy = grid.heightAt(nx, nz);
+      const hy = grid.heightAt(nx, nz, FOOT_R);
       character.root.position.set(nx, hy, nz);
       character.setFacing(Math.atan2(move.x, move.z));
       speedNow = speed;
+      moving = true;
     }
     character.setMove(speedNow, dt);
 
-    refreshFollowTarget();
-    aim(target);
-
-    const ox = Math.cos(camera.alpha) * Math.sin(camera.beta);
-    const oy = Math.cos(camera.beta);
-    const oz = Math.sin(camera.alpha) * Math.sin(camera.beta);
-    let r = desiredRadius;
-    for (let t = 2.2; t <= desiredRadius; t += 0.25) {
-      if (grid.hitsCamera(target.x + ox * t, target.y + oy * t, target.z + oz * t)) {
-        r = Math.max(4.2, t - 0.35);
-        break;
-      }
-    }
-    if (r < desiredRadius - 0.8) {
-      camera.beta = Math.max(camera.lowerBetaLimit!, camera.beta - 0.1);
-    }
-    camera.radius = r;
+    smoothFollowTarget(dt, moving, character.root.rotation.y);
+    followCamera(dt);
+    updateFade(dt);
   };
 
   const setLocked = (v: boolean) => {
@@ -295,6 +387,7 @@ export async function createPlayer(
   };
 
   const dispose = () => {
+    fader.restore();
     character.dispose();
     camera.dispose();
   };

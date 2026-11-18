@@ -3,6 +3,7 @@ import type { Character } from '../characters/buildCharacter';
 import type { WalkGrid } from '../engine/collision';
 import type { DialoguePage } from '../data/content';
 import type { PlayerCtl } from '../player/player';
+import type { MinimapSchema } from '../ui/minimap';
 
 export type InteractKind = 'talk' | 'investigate' | 'door' | 'ship';
 
@@ -32,6 +33,7 @@ export type StageContext = {
   update?: (dt: number) => void;
   strengthAt?: (x: number, z: number) => { value: number; kind: 'strong' | 'peak' | 'weak' };
   dispose: () => void;
+  minimap?: MinimapSchema;
 };
 
 export type StageHandle = StageContext;

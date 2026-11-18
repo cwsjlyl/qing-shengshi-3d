@@ -227,9 +227,9 @@ export function buildHallFloor(scene: Scene, name: string, width: number, depth:
   const floor = MeshBuilder.CreateGround(name, { width, height: depth, subdivisions: 20 }, scene);
   const positions = floor.getVerticesData(VertexBuffer.PositionKind)!;
   const colors: number[] = [];
-  const a = hexColor('#B08950');
-  const b = hexColor('#8C6A3A');
-  const inlay = hexColor('#C4A05A');
+  const a = hexColor('#8A9198');
+  const b = hexColor('#6E767E');
+  const inlay = hexColor('#A8B0B6');
   for (let i = 0; i < positions.length; i += 3) {
     const x = positions[i];
     const z = positions[i + 2];
@@ -240,7 +240,7 @@ export function buildHallFloor(scene: Scene, name: string, width: number, depth:
   }
   floor.setVerticesData(VertexBuffer.ColorKind, colors);
   const mat = new StandardMaterial(name + '-mat', scene);
-  mat.specularColor = new Color3(0.12, 0.1, 0.07);
+  mat.specularColor = new Color3(0.1, 0.11, 0.12);
   mat.specularPower = 32;
   mat.diffuseColor = Color3.White();
   mat.freeze();

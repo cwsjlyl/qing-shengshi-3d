@@ -65,19 +65,54 @@ export class WalkGrid {
     this.ramps.push(r);
   }
 
-  heightAt(x: number, z: number): number {
+  /** Height of a single ramp at a point already known to lie inside its AABB. */
+  rampHeight(r: Ramp, x: number, z: number): number {
+    const span = r.axis === 'x' ? r.maxX - r.minX : r.maxZ - r.minZ;
+    if (span <= 1e-8) return Math.max(r.y0, r.y1);
+    const t0 = r.axis === 'x' ? (x - r.minX) / span : (z - r.minZ) / span;
+    const t = r.fromMin ? t0 : 1 - t0;
+    return r.y0 + (r.y1 - r.y0) * Math.min(1, Math.max(0, t));
+  }
+
+  private rampHeightIfInside(x: number, z: number): number {
+    let y = 0;
+    for (const r of this.ramps) {
+      if (x >= r.minX && x <= r.maxX && z >= r.minZ && z <= r.maxZ) {
+        const hy = this.rampHeight(r, x, z);
+        if (hy > y) y = hy;
+      }
+    }
+    return y;
+  }
+
+  /**
+   * Walk height at (x, z). Platforms use the root point only (a foot radius
+   * would lift the player on courtyard ground beside a terrace — the t56 bug).
+   * Ramps may also be sampled under a small foot radius so the player still
+   * rises when the body is on the flight but the root is just outside the AABB.
+   */
+  heightAt(x: number, z: number, footR = 0): number {
     let y = 0;
     for (const p of this.platforms) {
       if (x >= p.minX && x <= p.maxX && z >= p.minZ && z <= p.maxZ) {
         if (p.y > y) y = p.y;
       }
     }
-    for (const r of this.ramps) {
-      if (x >= r.minX && x <= r.maxX && z >= r.minZ && z <= r.maxZ) {
-        const span = r.axis === 'x' ? r.maxX - r.minX : r.maxZ - r.minZ;
-        const t0 = r.axis === 'x' ? (x - r.minX) / span : (z - r.minZ) / span;
-        const t = r.fromMin ? t0 : 1 - t0;
-        const hy = r.y0 + (r.y1 - r.y0) * Math.min(1, Math.max(0, t));
+    y = Math.max(y, this.rampHeightIfInside(x, z));
+    if (footR > 0) {
+      const d = footR * 0.7071;
+      const offsets: Array<[number, number]> = [
+        [footR, 0],
+        [-footR, 0],
+        [0, footR],
+        [0, -footR],
+        [d, d],
+        [d, -d],
+        [-d, d],
+        [-d, -d]
+      ];
+      for (const [dx, dz] of offsets) {
+        const hy = this.rampHeightIfInside(x + dx, z + dz);
         if (hy > y) y = hy;
       }
     }
