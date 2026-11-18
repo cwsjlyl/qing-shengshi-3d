@@ -412,6 +412,8 @@ function followHeight(
   assert(almostFree(grid, 8, 0), 'Yongzheng east court walkable');
   assert(pushedOut(grid, 0, -14), 'Yongzheng hall interior blocked');
   assert(almostFree(grid, 0, 18), 'Yongzheng north gate gap walkable');
+  assert(almostFree(grid, 0, 16.2), 'Yongzheng north city-gate exit walkable');
+  follow(grid, [[0, 2], [0, 8], [0, 16.2]], 'Yongzheng spawn → north city-gate exit');
   follow(grid, [[0, 2], [-1.8, -2.1]], 'Yongzheng spawn → official A');
   followHeight(
     grid,

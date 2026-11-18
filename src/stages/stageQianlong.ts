@@ -298,17 +298,17 @@ export async function loadQianlongStage(
   );
   chars.push(farmerB);
 
-  const shipPos = new Vector3(22, 0, 2.2);
+  const shipPos = new Vector3(21.2, 0, 1.8);
   const interactables = [
     npcInteractable('qianlong', '乾隆皇帝', qianlong, DIALOGUE.qianlong, { radius: 2.6 }),
     npcInteractable('soldier', '準噶爾平亂（清兵）', chars[1], DIALOGUE.soldier, { required: false, radius: 2.4 }),
     npcInteractable('heshen', '和珅', heshen, DIALOGUE.heshen, { radius: 2.5 }),
     npcInteractable('farmer', '農夫', farmerA, DIALOGUE.farmer, { radius: 2.6 }),
-    pointInteractable('ships', '南巡船隊', shipPos, DIALOGUE.ships, { kind: 'investigate', radius: 3.4 }),
+    pointInteractable('ships', '南巡船隊', shipPos, DIALOGUE.ships, { kind: 'investigate', radius: 2.6 }),
     pointInteractable('shipboard', '登上御船', new Vector3(24.2, 0, 3.2), [], {
       required: false,
       kind: 'ship',
-      radius: 3.2
+      radius: 3.4
     })
   ];
 
@@ -343,7 +343,7 @@ export async function loadQianlongStage(
       rect(24, 48, 0.5, 15.5)
     ],
     items: [
-      { x: 22, z: 2.2 },
+      { x: 21.2, z: 1.8 },
       { x: 15.4, z: 5.4 },
       { x: 14, z: 18 },
       { x: 24.2, z: 3.2, kind: 'exit' }

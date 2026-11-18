@@ -212,7 +212,34 @@ export const LESSON_SUMMARY =
 
 export const HINTS = {
   move: '用左下角搖桿或鍵盤 WASD 移動，拖曳畫面轉動視角。靠近人物後，按右下角「傾談／調查」。',
-  quizReady: '證據已齊全。請走到出口，回答三條問題。',
+  quizReady: '證據已齊全。請跟著箭嘴走到出口，回答三條問題。',
   pwReady: '答對了！請在出口輸入密碼，繼續行程。',
-  boardReady: '密碼正確。請走到大船邊，登上南巡御船。'
+  boardReady: '密碼正確。請跟著箭嘴再找乾隆皇帝，聽取最後挑戰的指示。',
+  shipQuizReady: '證據已齊全。請跟著箭嘴走到碼頭御船，回答三條問題。'
 };
+
+/** 老師最後挑戰密碼（額外，不取代各關 123／456／789） */
+export const FINAL_TEACHER_PASSWORD = '000';
+
+export const OPENING_BLURB =
+  '你將由現代返回清朝，走進康雍乾盛世，蒐集證據，思考國勢由盛轉衰。';
+
+export const EPILOGUE = {
+  waitTeacher: [
+    {
+      speaker: '乾隆皇帝',
+      text: '證據與題目都完成了。請等待老師的指示，作最後的挑戰；之後你便可以返回現代。'
+    }
+  ] satisfies DialoguePage[],
+  askPrompt: '你有什麼問題想最後問我的？當我回答後，你便可以返回現代。',
+  returnModern:
+    '你已返回現代。回想剛才的證據：早期康雍乾治國有方，國勢強盛；乾隆晚年國勢轉弱。',
+  reflectPrompt: '你會向乾隆進甚麼諫言？'
+} as const;
+
+export const CLASS_HINTS = {
+  stageDone: '本關完成。請返回課堂分關，準備用證據教組員。',
+  seekEmperor: '請再找乾隆皇帝，聽取老師最後挑戰的指示。',
+  finalPw: '這是老師提供的最後密碼。答對後便可向乾隆提出最後一問。',
+  askReady: '請向乾隆提出最後一問；回答後便可返回現代。'
+} as const;

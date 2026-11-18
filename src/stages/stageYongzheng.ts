@@ -173,7 +173,7 @@ export async function loadYongzhengStage(
   cower.root.rotation.x = 0.28;
 
   const treasuryPos = new Vector3(-9.0, 0, -2.4);
-  const exitPos = new Vector3(0, 0, -16.6);
+  const exitPos = new Vector3(0, 0, 16.2);
   const exit = buildExitMarker(scene, 'exit-yz');
   exit.position.copyFrom(exitPos);
 
@@ -185,7 +185,7 @@ export async function loadYongzhengStage(
       kind: 'investigate',
       radius: 2.8
     }),
-    pointInteractable('door', '大殿出口', exitPos, [], { required: false, kind: 'door', radius: 2.3 })
+    pointInteractable('door', '城門出口', exitPos, [], { required: false, kind: 'door', radius: 2.8 })
   ];
 
   // On the red carpet, looking up the aisle at the emperor and officials.
@@ -215,7 +215,7 @@ export async function loadYongzhengStage(
       { x: -9.0, z: -2.4 },
       { x: -9.0, z: -1.2 },
       { x: 8.5, z: 1.0 },
-      { x: 0, z: -16.6, kind: 'exit' }
+      { x: 0, z: 16.2, kind: 'exit' }
     ]
   };
 
