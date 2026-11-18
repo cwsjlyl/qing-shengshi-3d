@@ -26,19 +26,22 @@ async function put(
 /**
  * Extra pack modules for the Kangxi courtyard: pond edges instead of green
  * slabs, hall-front balustrades, flowers, lanterns, and a little architecture.
- * Kept off the west-aisle walkway and out of the Kangxi talk corridor.
+ * Pond-edge packs dress the real east pond, south of the grey bridge.
+ * Kept off walkable copings and out of the Kangxi talk corridor.
  */
 export async function dressKangxiPack(scene: Scene): Promise<PlacedModel[]> {
   const placed: PlacedModel[] = [];
 
-  // Stone pond edges along the west aisle lips. Yaw is chosen so the plant cluster
-  // points into the water, not onto the walkway (module local -Z is the planted side).
-  // West pond east lip: local -Z -> world -X (into the pond).
-  await put(scene, placed, MODEL.pondEdge, 'kx-edge-aisle-w-a', -5.15, 2, -Math.PI / 2, -0.6);
-  await put(scene, placed, MODEL.pondEdge, 'kx-edge-aisle-w-b', -5.15, 6, -Math.PI / 2, -0.6);
-  // Centre pond west lip: local -Z -> world +X (into the pond).
-  await put(scene, placed, MODEL.pondEdge, 'kx-edge-aisle-e-a', -1.25, 2, Math.PI / 2, -0.6);
-  await put(scene, placed, MODEL.pondEdge, 'kx-edge-aisle-e-b', -1.25, 6, Math.PI / 2, -0.6);
+  // Stone pond edges on the real east pond only (water X[0,8] Z[0,8]).
+  // Modules are ~4 m along local X; yaw puts that axis along the lip.
+  // Planted side (local -Z) points into the water, and the mesh sits just
+  // inside the water so the walkable 汉白玉 copings stay clear. Only the
+  // south half is dressed — a module at z=6 would intersect the grey bridge
+  // (Z[5.10, 8.10]). South lip uses the two leftover modules.
+  await put(scene, placed, MODEL.pondEdge, 'kx-edge-pond-w', 0.2, 2, Math.PI / 2, -0.6);
+  await put(scene, placed, MODEL.pondEdge, 'kx-edge-pond-e', 7.8, 2, -Math.PI / 2, -0.6);
+  await put(scene, placed, MODEL.pondEdge, 'kx-edge-pond-s-a', 2, 0.2, Math.PI, -0.6);
+  await put(scene, placed, MODEL.pondEdge, 'kx-edge-pond-s-b', 6, 0.2, Math.PI, -0.6);
 
   // Hall-front stone balustrade covers the pale hall terrace rail, with a stair gap in the centre.
   // Hall is at (0,0,-8); stone front is at z ≈ -1.1, platform top ≈ 1.1, module length 4.26.
@@ -65,11 +68,11 @@ export async function dressKangxiPack(scene: Scene): Promise<PlacedModel[]> {
     await put(scene, placed, MODEL.peony, name, x, z, rot, 0);
   }
 
-  // Floating lanterns on both ponds (existing pair stays on the centre pond).
-  await put(scene, placed, MODEL.waterLantern, 'kx-wlan-1', -6.6, 3.4, 0.4, -0.24);
-  await put(scene, placed, MODEL.waterLantern, 'kx-wlan-2', -5.4, 5.0, -0.6, -0.24);
-  await put(scene, placed, MODEL.waterLantern, 'kx-wlan-3', -7.0, 1.6, 1.1, -0.24);
-  await put(scene, placed, MODEL.waterLantern, 'kx-wlan-4', -0.5, 5.2, 0.2, -0.24);
+  // Floating lanterns on the real east pond, south of the grey bridge.
+  await put(scene, placed, MODEL.waterLantern, 'kx-wlan-1', 1.8, 2.2, 0.4, -0.24);
+  await put(scene, placed, MODEL.waterLantern, 'kx-wlan-2', 2.6, 4.0, -0.6, -0.24);
+  await put(scene, placed, MODEL.waterLantern, 'kx-wlan-3', 5.4, 1.8, 1.1, -0.24);
+  await put(scene, placed, MODEL.waterLantern, 'kx-wlan-4', 6.5, 3.6, 0.2, -0.24);
 
   // Side colonnade density only — far from the opening view and talk shot.
   await put(scene, placed, MODEL.walkwayBay, 'kx-walk-w', -13, 4, Math.PI / 2, 0);
@@ -142,7 +145,7 @@ async function dressKangxiMeshy(scene: Scene, placed: PlacedModel[]): Promise<vo
     await put(scene, placed, MODEL.meshyPeony, `meshy-peony-${i}`, x, z, rot, 0, s);
   }
   const stools: Array<[number, number, number, number]> = [
-    [7.2, -0.6, 0.4, 0.36],
+    [11.0, -0.6, 0.4, 0.36],
     [10.2, -6.2, -0.3, 0.36],
     [6.0, -4.4, 0.7, 0.36]
   ];

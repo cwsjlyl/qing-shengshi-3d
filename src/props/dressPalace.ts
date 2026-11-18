@@ -152,8 +152,10 @@ export function dressCourtyard(scene: Scene, court: TransformNode): void {
     if (/(low-tea-table|tea-set-on-tray|floor-cushion-set|guqin-on-stand)$/.test(name) && p.x < -3 && p.x > -8 && p.z > 0 && p.z < 5) {
       node.position.set(p.x + 16.2, p.y, p.z + 6.0);
     }
+    // Leftover west-court lotus sat on cobble (there is no west pond).
+    // Move them into the real east pond, south of the bridge — not onto the throne terrace.
     if (/lotus-cluster$/.test(name) && p.x < -5 && p.z > 0 && p.z < 4) {
-      node.position.set(10.2, p.y, 8.2);
+      node.position.set(3.2, p.y, 2.4);
     }
   }
 
@@ -166,7 +168,7 @@ export function dressCourtyard(scene: Scene, court: TransformNode): void {
 function addGrassVerge(scene: Scene, parent: TransformNode): void {
   const grass = stdMat(scene, '#24582A', { specular: 0.04 });
   const grassDeep = stdMat(scene, '#1C4A22', { specular: 0.04 });
-  // Geometric green slabs removed — pack lotus pond edges now line the aisle.
+  // Geometric green slabs removed — pack lotus pond edges dress the real east pond.
   // Soft tufts only, kept on the water side of the lips (not on the walkway).
   let seed = 91;
   const rnd = () => {
@@ -174,13 +176,13 @@ function addGrassVerge(scene: Scene, parent: TransformNode): void {
     return seed / 2147483647;
   };
   const tuftPts: Array<[number, number]> = [
-    [-8.0, 2.2],
-    [-8.2, 5.0],
-    [-0.4, 2.0],
-    [-0.35, 5.4],
-    [-7.2, -0.8],
-    [-0.5, -0.8],
-    [-5.8, 8.2]
+    [0.3, 2.2],
+    [0.3, 4.0],
+    [7.7, 2.0],
+    [7.7, 4.0],
+    [2.0, 0.3],
+    [4.0, 0.3],
+    [6.0, 0.3]
   ];
   tuftPts.forEach((p, i) => {
     const t = MeshBuilder.CreateCylinder(
@@ -200,13 +202,13 @@ function addPavingOverlay(scene: Scene, parent: TransformNode): void {
   // Continuous cobble planes hide the 4×4 pack module seams on walkable ground, leaving the ponds open.
   const patches: Array<[string, number, number, number, number]> = [
     // name, cx, cz, width, depth — courtyard is ~28×28.
-    // Ponds (visible water) at x=-8.00..-5.91 and -0.49..0.00, z=0..5.12 (bridge north of that).
-    // Aisle cobble meets the pack 汉白玉 lips (west coping x=-5.91..-5.05, east x=-1.35..-0.49).
-    ['pave-west', -11.175, 0, 5.65, 28],
-    ['pave-aisle', -3.20, 0, 3.70, 28],
-    ['pave-east', 7.175, 0, 13.65, 28],
-    ['pave-south', -4.0, -7.175, 8.7, 13.65],
-    ['pave-north', -4.0, 11.2, 8.7, 5.6]
+    // Visible pond + copings at X[-1.15, 9.15] Z[-1.15, 9.15] stay open (water
+    // is X[0, 8] Z[0, 8]; 汉白玉 rims sit just outside). West court is a single
+    // cobble sheet — there is no second pond west of the aisle.
+    ['pave-west', -7.575, 0, 12.85, 28],
+    ['pave-east', 11.575, 0, 4.85, 28],
+    ['pave-south', 4.0, -7.575, 10.3, 12.85],
+    ['pave-north', 4.0, 11.575, 10.3, 4.85]
   ];
   for (const [name, cx, cz, w, d] of patches) {
     const tex = makeCobbleTexture(scene, w / 0.9, d / 0.9);

@@ -89,7 +89,9 @@ export class WalkGrid {
    * Walk height at (x, z). Platforms use the root point only (a foot radius
    * would lift the player on courtyard ground beside a terrace — the t56 bug).
    * Ramps may also be sampled under a small foot radius so the player still
-   * rises when the body is on the flight but the root is just outside the AABB.
+   * rises when the body is on the flight but the root is just past the end.
+   * The extra samples run only along the slope axis, inside the flight width;
+   * sampling sideways would lift a player walking *beside* a stair or deck.
    */
   heightAt(x: number, z: number, footR = 0): number {
     let y = 0;
@@ -100,20 +102,26 @@ export class WalkGrid {
     }
     y = Math.max(y, this.rampHeightIfInside(x, z));
     if (footR > 0) {
-      const d = footR * 0.7071;
-      const offsets: Array<[number, number]> = [
-        [footR, 0],
-        [-footR, 0],
-        [0, footR],
-        [0, -footR],
-        [d, d],
-        [d, -d],
-        [-d, d],
-        [-d, -d]
-      ];
-      for (const [dx, dz] of offsets) {
-        const hy = this.rampHeightIfInside(x + dx, z + dz);
-        if (hy > y) y = hy;
+      for (const r of this.ramps) {
+        if (r.axis === 'x') {
+          if (z < r.minZ || z > r.maxZ) continue;
+          for (const dx of [footR, -footR]) {
+            const xx = x + dx;
+            if (xx >= r.minX && xx <= r.maxX) {
+              const hy = this.rampHeight(r, xx, z);
+              if (hy > y) y = hy;
+            }
+          }
+        } else {
+          if (x < r.minX || x > r.maxX) continue;
+          for (const dz of [footR, -footR]) {
+            const zz = z + dz;
+            if (zz >= r.minZ && zz <= r.maxZ) {
+              const hy = this.rampHeight(r, x, zz);
+              if (hy > y) y = hy;
+            }
+          }
+        }
       }
     }
     return y;

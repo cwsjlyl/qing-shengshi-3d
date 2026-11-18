@@ -18,6 +18,7 @@ import { loadKangxiStage } from './stages/stageKangxi';
 import { loadYongzhengStage } from './stages/stageYongzheng';
 import { loadQianlongStage, unlockShipApproach } from './stages/stageQianlong';
 import type { Interactable, StageHandle, StageId } from './stages/types';
+import { dumpWalkScene } from './engine/qaDump';
 import { Animation, Vector3 } from '@babylonjs/core';
 
 export class Game {
@@ -571,6 +572,34 @@ export function installQaHook(game: Game): void {
     required: () =>
       g.stage?.interactables.map((i) => ({ id: i.id, talked: i.talked, title: i.title, kind: i.kind })),
     modalOpen: () => g.hud.isModalOpen,
+    dump: (opts?: { points?: Array<[number, number, string]>; regions?: Array<{ x0: number; x1: number; z0: number; z1: number; step: number; tag: string }> }) => {
+      const stage = g.stage;
+      if (!stage) return null;
+      const scene = stage.player.camera.getScene();
+      const data = dumpWalkScene(scene, { ...(opts ?? {}), grid: stage.grid });
+      const p = stage.player.getPosition();
+      const cam = stage.player.camera;
+      return {
+        stage: g.stageId,
+        player: { x: p.x, y: p.y, z: p.z },
+        cam: {
+          alpha: cam.alpha,
+          beta: cam.beta,
+          radius: cam.radius,
+          pos: { x: cam.position.x, y: cam.position.y, z: cam.position.z },
+          global: cam.globalPosition
+            ? { x: cam.globalPosition.x, y: cam.globalPosition.y, z: cam.globalPosition.z }
+            : null,
+          target: { x: cam.target.x, y: cam.target.y, z: cam.target.z }
+        },
+        grid: {
+          solids: stage.grid.solids,
+          platforms: stage.grid.platforms,
+          ramps: stage.grid.ramps
+        },
+        ...data
+      };
+    },
     inspect: () => {
       const stage = g.stage;
       if (!stage) return null;

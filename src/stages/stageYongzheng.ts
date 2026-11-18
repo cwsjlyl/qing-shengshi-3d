@@ -208,8 +208,8 @@ export async function loadYongzhengStage(
       rect(-4.2, -1.15, 14.6, 18.4),
       rect(1.15, 4.2, 14.6, 18.4),
       rect(-5.4, 5.4, -17.2, -10.2),
-      rect(-2.05, 2.05, -10.0, -4.0, 'platform'),
-      rect(-2.25, 2.25, -4.25, -2.25, 'platform')
+      rect(-2.07, 2.07, -10.07, -3.93, 'platform'),
+      rect(-2.1, 2.1, -4.65, -2.45, 'platform')
     ],
     items: [
       { x: -9.0, z: -2.4 },

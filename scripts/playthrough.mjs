@@ -221,8 +221,8 @@ await sleep(500);
 await shot(page, 'preview-meshy-peony.png');
 
 await page.evaluate(() => {
-  window.__qing.teleport(5.8, -2.8);
-  window.__qing.aim(7.2, 0.4, -0.6, 3.14, 1.1, 3.2);
+  window.__qing.teleport(12.0, 1.2);
+  window.__qing.aim(11.0, 0.4, -0.6, 3.14, 1.1, 3.2);
 });
 await sleep(500);
 await shot(page, 'preview-meshy-stool.png');

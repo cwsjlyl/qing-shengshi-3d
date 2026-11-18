@@ -56,12 +56,12 @@ export async function loadKangxiStage(
     // is a standing pose, so we do not bend the legs to sit.
     attachToWorld(
       await buildCharacter(scene, { id: 'kangxi', kind: 'kangxi' }),
-      -10,
+      10,
       1.1,
       5.8,
       Math.PI
     ),
-    attachToWorld(await buildCharacter(scene, { id: 'manchu', kind: 'manchu' }), -7.5, 0, 8.35, Math.PI - 0.35),
+    attachToWorld(await buildCharacter(scene, { id: 'manchu', kind: 'manchu' }), 7.5, 0, 8.35, Math.PI + 0.35),
     attachToWorld(await buildCharacter(scene, { id: 'han', kind: 'han' }), 12.15, 0, 0.15, -Math.PI / 2)
   ];
 
@@ -96,18 +96,18 @@ export async function loadKangxiStage(
       rect(-4.2, -1.15, 11.5, 15.0),
       rect(1.15, 4.2, 11.5, 15.0),
       rect(-7.55, 7.55, -13.5, -1.15),
-      rect(-11.93, -8.07, 5.07, 12.93, 'platform'),
-      rect(-8.07, -5.5, 8.75, 13.25, 'platform'),
-      rect(-8.00, -6.20, 0.30, 5.12, 'water'),
-      rect(-0.20, 0.02, 0.30, 5.12, 'water'),
-      rect(-8.20, 0.20, 5.12, 8.08, 'platform'),
-      rect(6.45, 9.75, 4.74, 7.16),
-      rect(-10.65, -7.95, -9.20, -5.58),
+      rect(7.93, 12.07, 4.93, 13.07, 'platform'),
+      rect(5.8, 8.0, 8.9, 13.1, 'platform'),
+      rect(0.2, 7.8, 0.2, 5.12, 'water'),
+      rect(-0.2, 8.2, 5.25, 7.95, 'platform'),
+      rect(-9.75, -6.45, 4.74, 7.16),
+      rect(8.4, 10.6, -9.2, -5.58),
+      rect(-13.55, -8.85, 6.25, 10.95),
       rect(9.0, 9.6, -3.0, -0.6),
       rect(10.7, 12.3, -9.0, -7.4)
     ],
     items: [
-      { x: 7.2, z: -0.6 },
+      { x: 11.0, z: -0.6 },
       { x: 10.2, z: -6.2 },
       { x: 6.0, z: -4.4 },
       { x: 9.3, z: -1.8 },

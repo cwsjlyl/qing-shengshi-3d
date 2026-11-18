@@ -295,7 +295,9 @@ export async function createPlayer(
   function updateFade(dt: number): void {
     const p = character.root.getAbsolutePosition();
     chest.set(p.x, p.y + 1.25, p.z);
-    fader.update(scene, camera.position, chest, dt, true);
+    // Fade along the real eye → chest segment, not the look-ahead camera target.
+    const eye = camera.globalPosition ?? camera.position;
+    fader.update(scene, eye, chest, dt, true);
   }
 
   const update = (dt: number) => {

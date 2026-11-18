@@ -2,17 +2,27 @@
  * WalkGrid volumes for all three stages, kept in one place so the stage
  * loaders and scripts/check-walk.ts cannot drift apart.
  *
- * Kangxi pond / bridge numbers come from measured Babylon AABBs
- * (courtyard.glb + pack lotus-pond-edge with Matrix.RotationY):
- *   water modules          X[-8.00, 0.00] Z[ 0.00, 8.00]
- *   west outer coping      X[-9.010,-8.150] Z[0, 8]
- *   east outer coping      X[ 0.150, 1.010] Z[0, 8]
- *   south outer coping     X[-8.00, 0.00] Z[-1.010,-0.150]
- *   north outer coping     X[-8.00, 0.00] Z[ 8.150, 9.010]
- *   west aisle coping _0   X[-5.910,-5.050] Z[0, 8]
- *   east aisle coping _0   X[-1.350,-0.490] Z[0, 8]
- *   arched-stone-bridge    X[-8.200, 0.200] Z[ 5.100, 8.100]
- *                          deck ≈ 0.85 at the banks, ≈ 2.60 at the crown (x=-4)
+ * Kangxi numbers are world AABBs from a fully dressed scene
+ * (courtyard.glb + dressCourtyard + dressKangxiPack + characters).
+ * t68u had the same meshes with the X axis mirrored (water / bridge /
+ * terrace / well / rockery / moon-gate / pavilion all flipped). Do not
+ * reuse those X ranges.
+ *
+ *   water modules          X[ 0.00,  8.00] Z[ 0.00,  8.00]
+ *   west outer coping      X[-1.010,-0.150] Z[0, 8]
+ *   east outer coping      X[ 8.150, 9.010] Z[0, 8]
+ *   south outer coping     X[ 0.00,  8.00] Z[-1.010,-0.150]
+ *   north outer coping     X[ 0.00,  8.00] Z[ 8.150, 9.010]
+ *   arched-stone-bridge    node (4.0, -0.35, 6.6)
+ *                          X[-0.200, 8.200] Z[ 5.100, 8.100]
+ *                          deck ≈ 0.85 at the banks, ≈ 2.60 at the crown (x=4)
+ *   terrace modules        nodes (10, 7) and (10, 11), top y=1.1
+ *                          X[ 7.930, 12.070] Z[ 4.930, 13.070]
+ *   west step-flight       node (7.12, -0.05, 11)
+ *                          X[ 5.800,  8.000] Z[ 8.900, 13.100]
+ *                          high at x=8.00 (terrace), low at x=5.80
+ *   throne                 (10, 1.1, 7), footstool (10, 1.1, 8.4)
+ *   guardian lions         (0, 9.2)  X[-1.35, 1.35] Z[8.55, 10.01]
  *
  * Solids are 2D in XZ, so a walkable bridge deck has to be a gap in the
  * water solids plus ramps — a "gap" at ground under the arch is water.
@@ -33,7 +43,8 @@ export function applyKangxiWalk(grid: WalkGrid): void {
   grid.addSolid(1.15, 4.2, 11.5, 15.0, 0, 11);
   // Ceremonial hall interior. Front central stairs are decorative and
   // lead into this solid, so they stay at ground height (no ramp) to
-  // avoid trapping the player on the 台基.
+  // avoid trapping the player on the 台基. Screenshot t69u-1 is the
+  // grey arched pond bridge beside the north lions, not these stairs.
   grid.addSolid(-5.2, 5.2, -13.2, -4.15, 0, 13);
   // Raised 台基 wings / cheeks (measured base X[-7.57,7.57] Z[-13.57,-1.10]),
   // leaving a central stair gap around |x|<2.2. Does not extend onto the
@@ -43,42 +54,53 @@ export function applyKangxiWalk(grid: WalkGrid): void {
   grid.addSolid(-5.2, -2.2, -4.15, -1.15, 0, 2.2);
   grid.addSolid(2.2, 5.2, -4.15, -1.15, 0, 2.2);
 
-  // Visible lotus water only, inset slightly so a 0.42 radius can stand on
-  // the 汉白玉 copings. The aisle between the pack lips and the outer
-  // copings stay open. The bridge deck XZ is a gap: ramps lift the player.
-  // West pond, south of the bridge.
-  grid.addSolid(-8.00, -6.20, 0.30, 5.12);
-  // East / centre pond, south of the bridge.
-  grid.addSolid(-0.20, 0.02, 0.30, 5.12);
+  // Visible lotus water only, south of the arched bridge. Inset slightly
+  // so a 0.42 radius can stand on the 汉白玉 copings. The bridge deck XZ
+  // is a gap: ramps lift the player.
+  grid.addSolid(0.2, 7.8, 0.2, 5.12);
 
-  // Arched stone bridge, east-west over both ponds (crown at x=-4).
+  // Arched stone bridge, east-west over the pond (crown at x=4).
+  // Z is inset from the full mesh AABB Z[5.10, 8.10] so walking beside
+  // the deck (lions at z≈9.2, or the water's edge) is not lifted.
+  // A short west approach takes the player from the coping up onto the bank.
   grid.addRamp({
-    minX: -8.2,
-    maxX: -4.0,
-    minZ: 5.12,
-    maxZ: 8.08,
-    y0: 1.1,
+    minX: -1.05,
+    maxX: -0.2,
+    minZ: 5.25,
+    maxZ: 7.95,
+    y0: 0,
+    y1: 0.85,
+    axis: 'x',
+    fromMin: true
+  });
+  grid.addRamp({
+    minX: -0.2,
+    maxX: 4.0,
+    minZ: 5.25,
+    maxZ: 7.95,
+    y0: 0.85,
     y1: 2.6,
     axis: 'x',
     fromMin: true
   });
   grid.addRamp({
-    minX: -4.0,
-    maxX: 0.2,
-    minZ: 5.12,
-    maxZ: 8.08,
+    minX: 4.0,
+    maxX: 8.2,
+    minZ: 5.25,
+    maxZ: 7.95,
     y0: 2.6,
-    y1: 0.12,
+    y1: 0.85,
     axis: 'x',
     fromMin: true
   });
 
-  // Actual remaining rockery outcrop (measured Babylon AABB
-  // X[6.490, 9.708] Z[4.782, 7.124]).
-  grid.addSolid(6.45, 9.75, 4.74, 7.16, 0, 3.0);
-  // Well + the bamboo clump beside it (measured well X[-10.53,-8.04]
-  // Z[-7.30,-5.70]; bamboo X[-10.29,-8.56] Z[-9.06,-6.96]).
-  grid.addSolid(-10.65, -7.95, -9.20, -5.58, 0, 3.0);
+  // Rockery outcrop, world AABB X[-9.708, -6.490] Z[4.782, 7.124].
+  grid.addSolid(-9.75, -6.45, 4.74, 7.16, 0, 3.0);
+  // Well + the bamboo clump beside it (well X[8.47,10.53] Z[-7.30,-5.70];
+  // bamboo 175 X[8.56,10.29] Z[-9.06,-6.96]).
+  grid.addSolid(8.4, 10.6, -9.2, -5.58, 0, 3.0);
+  // Remaining west-court bamboo clump at (-9.5, -3).
+  grid.addSolid(-10.6, -8.4, -4.0, -2.15, 0, 4.4);
 
   // Meshy moon-gate wall wings (opening stays walkable) and pavilion footprint.
   // MESHY_COURT.moonGate (9.3, -1.8, scale 3.4, rotY=π/2); opening 1.15.
@@ -87,14 +109,14 @@ export function applyKangxiWalk(grid: WalkGrid): void {
   // MESHY_COURT.pavilion (11.5, -8.2, scale 3.5)
   grid.addSolid(9.50675, 13.49325, -10.19325, -6.20675, 0, 7.5);
 
-  // Courtyard-pack moon gate in the NE wall (node at 8.5, 11; wall
-  // X[6.50,10.50] Z[10.72,11.28]). Leave a ~2 m circular opening at x=8.5.
-  grid.addSolid(6.45, 7.45, 10.65, 11.35, 0, 3.6);
-  grid.addSolid(9.55, 10.55, 10.65, 11.35, 0, 3.6);
+  // Courtyard-pack moon gate in the NW wall (node at -8.5, 11; wall
+  // X[-10.50,-6.50] Z[10.72,11.28]). Leave a ~2 m circular opening at x=-8.5.
+  grid.addSolid(-10.55, -9.55, 10.65, 11.35, 0, 3.6);
+  grid.addSolid(-7.45, -6.45, 10.65, 11.35, 0, 3.6);
 
-  // Pack water pavilion was moved from (-5, 2.5) to (11.2, 8.6).
-  // Base 5×5: X[8.70,13.70] Z[6.10,11.10]. Tightened slightly.
-  grid.addSolid(8.85, 13.55, 6.25, 10.95, 0, 7.5);
+  // Pack water pavilion, world position (-11.2, 8.6). Base ~5×5
+  // X[-13.70,-8.70] Z[6.10,11.10], tightened to the deck mesh.
+  grid.addSolid(-13.55, -8.85, 6.25, 10.95, 0, 7.5);
 
   // Meshy peony pots (~scale 0.42–0.5, xz radius ≈ 0.92) and drum stools (~scale 0.36).
   const peonySolids: Array<[number, number, number]> = [
@@ -114,7 +136,7 @@ export function applyKangxiWalk(grid: WalkGrid): void {
     grid.addSolid(x - r, x + r, z - r, z + r, 0, 1.8);
   }
   const stoolSolids: Array<[number, number]> = [
-    [7.2, -0.6],
+    [11.0, -0.6],
     [10.2, -6.2],
     [6.0, -4.4]
   ];
@@ -123,28 +145,29 @@ export function applyKangxiWalk(grid: WalkGrid): void {
     grid.addSolid(x - r, x + r, z - r, z + r, 0, 1.0);
   }
 
-  // West throne terrace: two pack modules at (-10, 7) and (-10, 11). Collision
+  // East throne terrace: two pack modules at (10, 7) and (10, 11). Collision
   // covers only the walkable top (y=1.1), not the skirt or the courtyard
-  // south of z≈5.07. East step-flight is a ramp, not a flat 1.1 slab.
-  grid.addPlatform(-11.93, -8.07, 5.07, 12.93, 1.1);
+  // south of z≈4.93. West step-flight is a ramp, not a flat 1.1 slab.
+  grid.addPlatform(7.93, 12.07, 4.93, 13.07, 1.1);
   // Roofs / walkway eaves: block the camera but not the player.
   grid.addCameraSolid(-14.4, -11.6, -8.5, 2.5, 2.5, 6.5);
   grid.addCameraSolid(10.2, 14.4, -12.5, 9.5, 2.5, 7.5);
-  grid.addCameraSolid(-13.5, -7.4, 4.6, 13.4, 3.2, 8.0);
+  grid.addCameraSolid(7.5, 12.5, 4.6, 13.4, 3.2, 8.0);
+  grid.addCameraSolid(-14.5, -7.9, 5.3, 11.9, 2.5, 8.0);
   grid.addCameraSolid(-14.4, -11.6, 2.0, 6.5, 2.5, 6.5);
   grid.addCameraSolid(10.2, 14.4, -6.5, -1.5, 2.5, 7.5);
 
-  // East step-flight measured X[-8.000,-5.800] Z[8.900,13.100], high at
-  // the west (platform) end, low at the east.
+  // West step-flight of the east terrace: X[5.800, 8.000] Z[8.900, 13.100],
+  // high at the east (platform) end, low at the west.
   grid.addRamp({
-    minX: -8.07,
-    maxX: -5.5,
-    minZ: 8.75,
-    maxZ: 13.25,
+    minX: 5.8,
+    maxX: 8.0,
+    minZ: 8.9,
+    maxZ: 13.1,
     y0: 0,
     y1: 1.1,
     axis: 'x',
-    fromMin: false
+    fromMin: true
   });
 }
 
@@ -158,12 +181,14 @@ export function applyYongzhengWalk(grid: WalkGrid): void {
   grid.addSolid(-4.2, -1.15, 14.6, 18.4, 0, 11);
   grid.addSolid(1.15, 4.2, 14.6, 18.4, 0, 11);
   grid.addSolid(-5.4, 5.4, -17.2, -10.2, 0, 13);
-  grid.addPlatform(-2.05, 2.05, -10.0, -4.0, 1.1);
+  // Two terrace modules: X[-2.07, 2.07] Z[-10.07, -3.93], top y=1.1.
+  grid.addPlatform(-2.07, 2.07, -10.07, -3.93, 1.1);
+  // dais-steps at (0, -3.77): high under the dais at z=-4.65, low at z=-2.45.
   grid.addRamp({
-    minX: -2.25,
-    maxX: 2.25,
-    minZ: -4.25,
-    maxZ: -2.25,
+    minX: -2.1,
+    maxX: 2.1,
+    minZ: -4.65,
+    maxZ: -2.45,
     y0: 0,
     y1: 1.1,
     axis: 'z',
@@ -185,8 +210,9 @@ export function applyQianlongWalk(grid: WalkGrid, shipBlocked = true): void {
   }
   grid.addSolid(-4.2, 4.2, 38.8, 44.0, 0, 12);
   grid.addSolid(-31.5, -24.8, 7.2, 13.2, 0, 8);
-  // Meshy shore pavilion footprint (scale 4.2, xz radius ≈ 0.67).
-  grid.addSolid(13.9, 18.5, 9.9, 14.5, 0, 9);
+  // Meshy shore pavilion at (16.2, 12.2). Keep the solid east of the
+  // coast-bridge deck X[12.50, 15.50] so the south approach stays open.
+  grid.addSolid(15.55, 18.7, 9.9, 14.5, 0, 9);
   const pr = 0.92 * 0.5 * 0.7;
   grid.addSolid(15.2 - pr, 15.2 + pr, 9.6 - pr, 9.6 + pr, 0, 1.8);
   grid.addSolid(17.4 - pr, 17.4 + pr, 14.4 - pr, 14.4 + pr, 0, 1.8);
@@ -195,9 +221,10 @@ export function applyQianlongWalk(grid: WalkGrid, shipBlocked = true): void {
 
   // Coast arched stone-bridge at (14, -0.2, 18) rotY=π/2:
   // world X[12.50, 15.50] Z[13.80, 22.20], crown at z=18, deck ≈ 1.00 / 2.75.
+  // X inset slightly so walking beside the deck is not lifted.
   grid.addRamp({
-    minX: 12.55,
-    maxX: 15.45,
+    minX: 12.6,
+    maxX: 15.4,
     minZ: 13.8,
     maxZ: 18.0,
     y0: 0.15,
@@ -206,8 +233,8 @@ export function applyQianlongWalk(grid: WalkGrid, shipBlocked = true): void {
     fromMin: true
   });
   grid.addRamp({
-    minX: 12.55,
-    maxX: 15.45,
+    minX: 12.6,
+    maxX: 15.4,
     minZ: 18.0,
     maxZ: 22.2,
     y0: 2.75,

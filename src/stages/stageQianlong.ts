@@ -337,7 +337,8 @@ export async function loadQianlongStage(
       rect(18.5, 90, 4.15, 50, 'water'),
       rect(-4.2, 4.2, 38.8, 44.0),
       rect(-31.5, -24.8, 7.2, 13.2),
-      rect(13.9, 18.5, 9.9, 14.5),
+      rect(15.55, 18.7, 9.9, 14.5),
+      rect(12.6, 15.4, 13.8, 22.2, 'platform'),
       rect(18, 24.6, -0.15, 4.15, 'platform'),
       rect(24, 48, 0.5, 15.5)
     ],
